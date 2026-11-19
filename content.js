@@ -51,6 +51,7 @@
   };
   const setAttr = (el, k, v) => { if (el && el.getAttribute(k) !== v) el.setAttribute(k, v); };
   const setCls = (el, c, on) => { if (el && el.classList.contains(c) !== on) el.classList.toggle(c, on); };
+  const togAttr = (el, k, on) => { if (el && el.hasAttribute(k) !== on) { if (on) el.setAttribute(k, ''); else el.removeAttribute(k); } };
 
   function tagLayout() {
     // Modals (e.g. dashboard "Pré-Clos") reuse .mainNavbar for their title: only the page header is made sticky
@@ -95,19 +96,49 @@
   }
 
   // Key fields: on a new reservation / contract / impro, Rentway loads the rest of the screen only once one of them
-  // is filled in. While empty and editable they are highlighted (rw-key) so the agent sees where to start.
+  // is filled in. While empty and editable they are highlighted so the agent sees where to start.
   // Matched on their label, normalised (case, accents, "nr." / "n°" / "numéro", trailing "*"): never on the
   // generated #input-NNNN ids, which change from one screen and one Rentway version to the next.
+  // The state is a data-rw-key attribute, not a class: Vue 2 rewrites the whole class attribute of a .v-input on
+  // focus and blur, which wiped a class (the highlight vanished on click and stayed gone after the click outside).
   const KEY_FIELD = /^(?:(?:reservation|contrat) (?:nr|no|n°|num|numero)|(?:nr|no|n°|num|numero) (?:de )?(?:reservation|contrat)|code impro|impro code)$/;
-  const norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[.:*]/g, ' ').replace(/\s+/g, ' ').trim();
+  const norm = s => s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/[.:*]/g, ' ').replace(/\s+/g, ' ').trim();
   function flagKeys() {
+    const keys = [];
     document.querySelectorAll('.v-input').forEach(vi => {
       const label = vi.querySelector('label');
       const inp = vi.querySelector('input:not([type=hidden])');
       const key = !!(label && inp && !vi.closest('.v-dialog') && KEY_FIELD.test(norm(label.textContent)));
-      setCls(vi, 'rw-key', key && !inp.value && !inp.disabled && !vi.classList.contains('v-input--is-dirty')
-        && !vi.classList.contains('v-input--is-disabled') && !vi.classList.contains('v-input--is-readonly'));
+      const awaiting = key && !inp.value && !inp.disabled && !vi.classList.contains('v-input--is-dirty')
+        && !vi.classList.contains('v-input--is-disabled') && !vi.classList.contains('v-input--is-readonly');
+      togAttr(vi, 'data-rw-key', awaiting);
+      if (key) keys.push({ inp, awaiting });
     });
+    keyFocus(keys);
+  }
+
+  // Caret in the first key field, so the agent can type straight away. Only on a new screen (every key field on it
+  // is empty: never an existing record in edit mode), once per field, never while a window, menu or load is open,
+  // and never away from a field the user is typing in. A field the user left is not focused again; it can be
+  // once it has been filled, then emptied for a new record.
+  const focusDone = new WeakSet();
+  const typingElsewhere = () => {
+    const a = document.activeElement;
+    return !!(a && a !== document.body && a.matches('input, textarea, select, [contenteditable]:not([contenteditable=false])'));
+  };
+  const screenBusy = () => !!document.querySelector('.v-dialog--active, .menuable__content__active:not(.v-tooltip__content), '
+    + '.v-overlay--active.above-all, .v-overlay--active:has(.loading-image)');
+  function keyFocus(keys) {
+    keys.forEach(k => { if (k.inp.value) focusDone.delete(k.inp); });
+    if (!cfg.is('design') || !keys.length || keys.some(k => k.inp.value)) return;
+    const first = keys.find(k => k.awaiting);
+    if (!first || focusDone.has(first.inp)) return;
+    if (document.activeElement === first.inp || typingElsewhere()) { focusDone.add(first.inp); return; }
+    if (screenBusy() || document.visibilityState !== 'visible') return;   // try again on the next change
+    const r = first.inp.getBoundingClientRect();
+    if (!r.width || r.top < 0 || r.bottom > window.innerHeight) return;
+    focusDone.add(first.inp);
+    first.inp.focus({ preventScroll: true });
   }
 
   // Summary bar keeps the last known values so it stays visible on every tab of the same booking
@@ -152,6 +183,9 @@
   obs.observe(document.body, { subtree: true, childList: true, characterData: true });
   document.addEventListener('input', schedule, true);
   document.addEventListener('change', schedule, true);
+  // Vue rewrites a field's classes on focus / blur, dropping ours (rw-empty): put them back
+  document.addEventListener('focusin', schedule, true);
+  document.addEventListener('focusout', schedule, true);
   const onScroll = () => setCls(root, 'rw-scrolled', window.scrollY > 8);
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', schedule);
@@ -170,15 +204,17 @@
     obs.disconnect(); offChange();
     document.removeEventListener('input', schedule, true);
     document.removeEventListener('change', schedule, true);
+    document.removeEventListener('focusin', schedule, true);
+    document.removeEventListener('focusout', schedule, true);
     document.removeEventListener('keydown', onKey, true);
     window.removeEventListener('scroll', onScroll);
     window.removeEventListener('resize', schedule);
     bar.remove(); toggle.remove();
     root.classList.remove('rw-scrolled');
     root.style.removeProperty('--rw-top'); root.style.removeProperty('--rw-headh');
-    document.querySelectorAll('.rw-empty,.rw-key,.rw-head,.rw-tabs,.rw-primary,.rw-labelled,.rw-danger')
-      .forEach(e => e.classList.remove('rw-empty', 'rw-key', 'rw-head', 'rw-tabs', 'rw-primary', 'rw-labelled', 'rw-danger'));
-    document.querySelectorAll('[data-rw-label],[data-rw-kbd]').forEach(e => { e.removeAttribute('data-rw-label'); e.removeAttribute('data-rw-kbd'); });
+    document.querySelectorAll('.rw-empty,.rw-head,.rw-tabs,.rw-primary,.rw-labelled,.rw-danger')
+      .forEach(e => e.classList.remove('rw-empty', 'rw-head', 'rw-tabs', 'rw-primary', 'rw-labelled', 'rw-danger'));
+    document.querySelectorAll('[data-rw-label],[data-rw-kbd],[data-rw-key]').forEach(e => { e.removeAttribute('data-rw-label'); e.removeAttribute('data-rw-kbd'); e.removeAttribute('data-rw-key'); });
     delete window.__rwRemove;
   };
   return 'reskin applied';

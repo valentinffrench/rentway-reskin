@@ -19,7 +19,7 @@ Elle restyle les éléments existants et ajoute ses propres repères visuels, ma
 - Suppression du voile noir clignotant pendant les chargements, remplacé par une fine barre de progression. Le voile reste actif en arrière-plan pour bloquer les clics pendant le chargement.
 - Infobulles repositionnées sous les boutons.
 - Champs vides atténués, prix arrondis à 2 décimales dans le résumé.
-- **Champs à saisir en premier** mis en évidence (cadre bleu) tant qu'ils sont vides et modifiables : « Réservation nr. », « Contrat nr. », « Code impro ». Sur une nouvelle réservation, un nouveau contrat ou une impro, Rentway ne charge le reste de l'écran qu'une fois l'un d'eux rempli. Le cadre disparaît dès la première saisie ; jamais sur un champ verrouillé ni dans une fenêtre de recherche.
+- **Champs à saisir en premier** mis en évidence (cadre bleu) tant qu'ils sont vides et modifiables : « Réservation nr. », « Contrat nr. », « Code impro ». Sur une nouvelle réservation, un nouveau contrat ou une impro, Rentway ne charge le reste de l'écran qu'une fois l'un d'eux rempli. Le cadre disparaît dès la première saisie ; jamais sur un champ verrouillé ni dans une fenêtre de recherche. Sur un nouvel écran (tous ces champs vides), le curseur se place directement dans le premier : on peut taper tout de suite. Une seule fois par écran, jamais pendant un chargement ou avec une fenêtre ouverte, jamais sur une fiche existante, et jamais s'il est déjà dans un autre champ.
 - Fenêtres (modales) Rentway : fermeture avec la touche **Échap** ou un **clic à l'extérieur**. L'extension clique simplement sur le bouton de fermeture de la fenêtre : Rentway exécute exactement la même action qu'un clic manuel. Rien ne se passe si une liste déroulante ou un calendrier est ouvert, si une cellule de tableau est en cours d'édition ou pendant un chargement.
 - En-tête des fenêtres épuré (blanc) ; il ne recouvre plus les en-têtes de colonnes (ex. tableau de bord → Pré-Clos).
 
@@ -42,7 +42,7 @@ L'écran de démarrage (`/company-selector`) et la connexion ne sont jamais modi
 - Réglages **communs aux deux applications** : un changement dans le popup s'applique à tous les onglets Rentway ouverts, v1 et Pro. « Rentway d'origine » désactive tout partout.
 - Le popup reconnaît l'application de l'onglet et adapte ses libellés (la barre de résumé est propre à v1).
 - Les réglages choisis en v1.1 sont repris automatiquement.
-- Rentway v1 : champs à saisir en premier (Réservation nr., Contrat nr., Code impro) mis en évidence tant qu'ils sont vides.
+- Rentway v1 : champs à saisir en premier (Réservation nr., Contrat nr., Code impro) mis en évidence tant qu'ils sont vides, curseur placé dans le premier sur un nouvel écran.
 
 ## Installation (test sur un poste)
 
