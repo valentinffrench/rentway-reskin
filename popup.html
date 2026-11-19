@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><title>Rentway Reskin</title>
+<style>
+  :root{--ink:#0E1A33;--muted:#64708A;--line:#E2E7F0;--brand:#0041AB;--bg:#EEF1F6}
+  body{margin:0;width:300px;font:500 13px/1.4 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:#fff}
+  header{display:flex;align-items:center;gap:9px;padding:15px;border-bottom:1px solid var(--line)}
+  header img{width:24px;height:24px;border-radius:6px}
+  header b{font-size:14px} header small{display:block;color:var(--muted);font-weight:500;font-size:11px}
+  h2{margin:0;padding:15px 15px 3px;font-size:11px;font-weight:650;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:9px;padding:9px 15px;cursor:pointer}
+  .row:hover{background:#F6F8FC}
+  .row small{display:block;color:var(--muted);font-size:11px;font-weight:500}
+  .row.sub{padding-left:38px}
+  .row.dis{opacity:.45;cursor:default} .row.dis:hover{background:none}
+  .sw{position:relative;width:38px;height:24px;flex:none}
+  .sw input{opacity:0;width:0;height:0;position:absolute}
+  .sw span{position:absolute;inset:0;border-radius:24px;background:#C9D1DE;transition:background .2s;cursor:pointer}
+  .sw span::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .2s}
+  .sw input:checked+span{background:var(--brand)} .sw input:checked+span::after{transform:translateX(14px)}
+  .sw input:focus-visible+span{outline:2px solid var(--brand);outline-offset:2px}
+  .sw input:disabled+span{cursor:default}
+  .presets{display:flex;gap:6px;padding:15px;border-top:1px solid var(--line);margin-top:9px}
+  .presets button{flex:1;font:600 12px Inter,system-ui,sans-serif;padding:6px 9px;border-radius:6px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
+  .presets button:hover{background:var(--bg)}
+  .presets button:disabled{opacity:.45;cursor:default}
+  .hint{margin:0 15px 15px;padding:9px;border-radius:6px;background:var(--bg);color:var(--muted);font-size:12px}
+  .hint kbd{font:600 11px Inter,system-ui,sans-serif;padding:1px 6px;border-radius:3px;background:#fff;border:1px solid var(--line);color:var(--ink)}
+  .off{color:var(--muted);padding:0 15px 15px;font-size:12px;display:none}
+</style></head>
+<body>
+  <header><img src="icons/icon32.png" alt=""><div><b>Rentway Reskin</b><small>CaribeCar · v1.1.0</small></div></header>
+
+  <h2>Apparence</h2>
+  <label class="row" for="design"><span>Nouveau design<small>En-tête fixe, onglets libellés, cartes, fenêtres</small></span><span class="sw"><input id="design" type="checkbox"><span></span></span></label>
+  <label class="row sub" for="summary"><span>Barre de résumé<small>Dates, agences, catégorie, solde</small></span><span class="sw"><input id="summary" type="checkbox"><span></span></span></label>
+  <label class="row" for="tips"><span>Infobulles repositionnées<small>Sous le bouton, au lieu de le masquer</small></span><span class="sw"><input id="tips" type="checkbox"><span></span></span></label>
+  <label class="row" for="button"><span>Bouton ON/OFF à l'écran<small>En bas à gauche de Rentway</small></span><span class="sw"><input id="button" type="checkbox"><span></span></span></label>
+
+  <h2>Confort</h2>
+  <label class="row" for="loader"><span>Chargement discret<small>Fine barre au lieu du voile noir clignotant</small></span><span class="sw"><input id="loader" type="checkbox"><span></span></span></label>
+  <label class="row" for="modals"><span>Fermer les fenêtres<small>Touche Échap ou clic à l'extérieur</small></span><span class="sw"><input id="modals" type="checkbox"><span></span></span></label>
+  <label class="row" for="shortcuts"><span>Raccourcis clavier<small><kbd style="font:inherit">Alt</kbd> + 1…0 pour changer d'onglet</small></span><span class="sw"><input id="shortcuts" type="checkbox"><span></span></span></label>
+
+  <div class="presets"><button id="all" type="button">Tout activer</button><button id="none" type="button">Rentway d'origine</button></div>
+  <p class="hint">« Rentway d'origine » désactive tout : utile lors d'un appel au support. Les réglages sont mémorisés sur ce poste.</p>
+  <p class="off" id="na">Ouvrez (ou rechargez) un onglet Rentway pour utiliser ces réglages.</p>
+  <script src="popup.js"></script>
+</body></html>

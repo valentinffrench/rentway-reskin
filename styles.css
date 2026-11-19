@@ -1,0 +1,173 @@
+/* Rentway Reskin — CaribeCar · v1.1.0
+   Every rule is scoped to the class of one enhancement on <html> (set by early.js from the popup settings):
+   rw-on = new design · rw-sum = summary bar · rw-calm = calm loading · rw-tips = tooltips · rw-btn = on-screen button.
+   Switching an enhancement off restores that part of Rentway exactly. */
+
+/* ===== Layout, cards, header, tabs, summary bar ===== */
+
+  /* ===== Tokens — golden-ratio scale on a 9px base (×/÷ φ ≈ 1.618) =====
+     g1 3 · g2 6 · g3 9 · g4 15 · g5 24 · g6 38 · g7 62
+     Radius: r1 3 (indicators) · r2 6 (controls, chips) · r3 9 (cards) */
+  html.rw-on{--g1:3px;--g2:6px;--g3:9px;--g4:15px;--g5:24px;--g6:38px;--g7:62px;
+    --r1:3px;--r2:6px;--r3:9px;
+    --rw-bg:#EEF1F6;--rw-surface:#fff;--rw-ink:#0E1A33;--rw-muted:#64708A;--rw-line:#E2E7F0;--rw-brand:#0041AB;--rw-brand-soft:#EAF0FC;
+    --rw-appbar:64px;--rw-bar-h:50px; /* 50 = g6 + 2·g2 */
+    --rw-headh:65px}
+  html.rw-on{--rw-top:var(--rw-appbar)!important}
+  html.rw-on.rw-sum:has(#rw-bar.rw-show){--rw-top:calc(var(--rw-appbar) + var(--rw-bar-h))!important}
+
+  /* Page: grey on the body, every wrapper transparent so cards stand out */
+  html.rw-on, html.rw-on body{background:var(--rw-bg)!important}
+  html.rw-on .v-application, html.rw-on .v-application--wrap, html.rw-on .v-main, html.rw-on .v-main__wrap{background:transparent!important}
+  html.rw-on .v-main__wrap{padding-top:var(--g4)}
+
+  /* Cards */
+  html.rw-on .pa5.v-card{background:var(--rw-surface)!important;border:1px solid var(--rw-line)!important;
+    box-shadow:0 1px 2px rgba(16,24,40,.05)!important;border-radius:var(--r3)!important;overflow:hidden}
+  html.rw-on .pa5.v-card .mb5.v-card{border:1px solid var(--rw-line)!important;border-radius:var(--r3)!important;box-shadow:none!important;overflow:hidden}
+  html.rw-on .pa5.v-card .docStyleTitle.main{background:var(--rw-surface)!important;color:var(--rw-ink)!important;text-align:left!important;justify-content:flex-start!important;
+    font-size:12px!important;font-weight:650!important;letter-spacing:.07em;text-transform:uppercase;height:auto!important;min-height:0!important;line-height:1.25!important;
+    padding:var(--g4) var(--g4) var(--g3)!important;margin-bottom:var(--g3);border-bottom:1px solid var(--rw-line);border-radius:0!important}
+  html.rw-on .pa5.v-card .docStyleTitle.main::before{content:"";display:inline-block;width:var(--g1);height:var(--g3);background:var(--rw-brand);
+    border-radius:var(--r1);margin-right:var(--g3);vertical-align:0}
+  html.rw-on .pa5.v-card .docStyleTitle.main .statusBtn{border-radius:var(--r2)!important;padding:var(--g1) var(--g3)!important}
+
+  /* Fields */
+  html.rw-on .v-input label, html.rw-on .v-input .v-label{color:var(--rw-muted)!important;font-size:11px!important;font-weight:500!important}
+  html.rw-on .v-input input, html.rw-on .v-input select, html.rw-on .v-select__selection{color:var(--rw-ink)!important;font-weight:550!important}
+  html.rw-on select:disabled{color:var(--rw-ink)!important;opacity:1!important;font-weight:550}
+  html.rw-on .v-text-field>.v-input__control>.v-input__slot:before{border-color:var(--rw-line)!important;border-style:solid!important}
+  html.rw-on .v-input.rw-empty{opacity:.4;transition:opacity .15s}
+  html.rw-on .v-input.rw-empty:hover, html.rw-on .v-input.rw-empty:focus-within, html.rw-on .v-input.v-input--is-dirty.rw-empty{opacity:1}
+  html.rw-on .pa5.v-card .v-btn{border-radius:var(--r2)!important}
+  html.rw-on .pa5.v-card .v-btn--disabled.v-btn--has-bg{background:transparent!important;border:1px solid var(--rw-line)!important;box-shadow:none!important;opacity:.55}
+  html.rw-on .v-chip{border-radius:var(--r2)!important;padding:0 var(--g3)!important}
+
+  /* Summary panel */
+  html.rw-on .frameSummaryStyles .extras{background:transparent!important;border-bottom:1px solid var(--rw-line);border-radius:0;padding-block:var(--g2)}
+  html.rw-on .frameSummaryStyles .extras:hover{background:#F6F8FC!important}
+
+  /* ===== Sticky page header: title + actions (row 1), tabs (row 2) =====
+     The sticky rows carry the body grey so content scrolling under them is masked seamlessly */
+  html.rw-on .rw-head, html.rw-on .rw-tabs{position:sticky;z-index:3;background:var(--rw-bg)}
+  html.rw-on .rw-head{top:var(--rw-top);padding-top:var(--g3)}
+  html.rw-on .rw-tabs{top:calc(var(--rw-top) + var(--rw-headh));padding-bottom:var(--g4)}
+  html.rw-on .rw-head > [class*=col], html.rw-on .rw-tabs > [class*=col]{padding-top:0!important;padding-bottom:0!important}
+  html.rw-on .rw-head content, html.rw-on .rw-tabs content{display:block}
+
+  /* Row 1 — header card top: min-height 56 = g6 + 2·g3 */
+  html.rw-on .mainNavbar{background:var(--rw-surface)!important;border:1px solid var(--rw-line)!important;border-bottom:0!important;
+    border-radius:var(--r3) var(--r3) 0 0!important;box-shadow:none!important;margin:0!important;height:auto!important}
+  html.rw-on .mainNavbar > .container{padding:0!important}
+  html.rw-on .mainNavbar .mainNavbar__content{background:transparent!important;align-items:center;min-height:calc(var(--g6) + 2*var(--g3));
+    padding:0 var(--g3) 0 var(--g5);margin:0!important}
+  html.rw-on .mainNavbar__content_title{color:var(--rw-ink)!important;font-size:17px!important;font-weight:650!important;letter-spacing:-.01em}
+  html.rw-on .mainNavbar__content_icons{display:flex!important;align-items:center;justify-content:flex-end;gap:var(--g1)}
+  html.rw-on .mainNavbar__content_icons button{min-width:var(--g6)!important;height:var(--g6)!important;padding:0 var(--g3)!important;
+    border-radius:var(--r2)!important;color:var(--rw-muted)!important}
+  html.rw-on .mainNavbar__content_icons button .v-icon{color:var(--rw-muted)!important;font-size:20px!important}
+  html.rw-on .mainNavbar__content_icons button .v-btn__content{flex-direction:row;gap:var(--g2);font-size:13px;font-weight:600;text-transform:none;letter-spacing:0}
+  html.rw-on .mainNavbar__content_icons button .v-btn__content::after{content:attr(data-rw-label)}
+  html.rw-on .mainNavbar__content_icons button.rw-labelled{color:var(--rw-ink)!important;border:1px solid var(--rw-line)!important}
+  html.rw-on .mainNavbar__content_icons button.rw-labelled .v-icon{color:var(--rw-ink)!important}
+  html.rw-on .mainNavbar__content_icons button.rw-primary{background:var(--rw-brand)!important;color:#fff!important;padding:0 var(--g4)!important;margin-left:var(--g2)}
+  html.rw-on .mainNavbar__content_icons button.rw-primary .v-icon{color:#fff!important}
+  html.rw-on .mainNavbar__content_icons button.rw-primary.v-btn--disabled{background:var(--rw-brand-soft)!important;color:#8EA3CC!important}
+  html.rw-on .mainNavbar__content_icons button.rw-primary.v-btn--disabled .v-icon{color:#8EA3CC!important}
+  html.rw-on .mainNavbar__content_icons button.rw-danger{margin-left:var(--g4);position:relative}
+  html.rw-on .mainNavbar__content_icons button.rw-danger::after{content:"";position:absolute;left:calc(-1 * var(--g3));top:var(--g3);bottom:var(--g3);width:1px;background:var(--rw-line)}
+  html.rw-on .mainNavbar__content_icons button.rw-danger .v-icon{color:#C62828!important}
+  html.rw-on .mainNavbar__content_icons button.v-btn--disabled:not(.rw-primary){opacity:.4}
+
+  /* Row 2 — underline tabs, left-aligned: height g6, padding g4, indicator g1 */
+  html.rw-on .secondNavbar{background:var(--rw-surface)!important;border:1px solid var(--rw-line)!important;border-top:0!important;
+    border-radius:0 0 var(--r3) var(--r3)!important;box-shadow:none!important;margin:0!important;height:auto!important;width:auto!important;max-width:none!important;
+    transition:box-shadow .2s}
+  html.rw-on.rw-scrolled .secondNavbar{box-shadow:0 var(--g2) var(--g4) calc(-1 * var(--g3)) rgba(16,24,40,.2)!important}
+  html.rw-on .secondNavbar > .container{padding:0 var(--g3)!important}
+  html.rw-on .secondNavbar__content{margin:0!important;border-top:1px solid var(--rw-line)}
+  html.rw-on .secondNavbar__content > div{display:flex!important;justify-content:flex-start!important;text-align:left!important;gap:0;overflow-x:auto;scrollbar-width:none}
+  html.rw-on .secondNavbar__content button.btnnavbar{background:transparent!important;color:var(--rw-muted)!important;height:var(--g6)!important;min-width:0!important;
+    padding:0 var(--g4)!important;border-radius:0!important;box-shadow:none!important;position:relative}
+  html.rw-on .secondNavbar__content button.btnnavbar .v-icon{color:inherit!important;font-size:18px!important}
+  html.rw-on .secondNavbar__content button.btnnavbar .v-btn__content{flex-direction:row;gap:var(--g2);font-size:13px;font-weight:550;text-transform:none;letter-spacing:0}
+  html.rw-on .secondNavbar__content button.btnnavbar .v-btn__content::after{content:attr(data-rw-label)}
+  html.rw-on .secondNavbar__content button.btnnavbar:hover{color:var(--rw-ink)!important}
+  html.rw-on .secondNavbar__content button.btnnavbar.activeThemeBtn{color:var(--rw-brand)!important;font-weight:650}
+  html.rw-on .secondNavbar__content button.btnnavbar.activeThemeBtn::after{content:"";position:absolute;left:var(--g3);right:var(--g3);bottom:0;height:var(--g1);
+    border-radius:var(--r1) var(--r1) 0 0;background:var(--rw-brand)}
+
+  /* Summary bar: height 50 = g6 + 2·g2 */
+  #rw-bar{position:fixed;top:64px;left:0;right:0;z-index:3;height:50px;display:none;align-items:center;gap:6px;padding:0 24px;
+    background:rgba(255,255,255,.94);backdrop-filter:blur(9px);border-bottom:1px solid #E2E7F0;font:500 13px/1 Inter,system-ui,sans-serif;color:#0E1A33;overflow-x:auto;white-space:nowrap}
+  html.rw-on.rw-sum #rw-bar.rw-show{display:flex}
+  #rw-bar .k{color:#64708A;font-size:11px;font-weight:500;margin-right:6px;text-transform:uppercase;letter-spacing:.05em}
+  #rw-bar .it{display:inline-flex;align-items:center;padding:9px 9px;border-radius:6px;background:#F3F5F9}
+  #rw-bar .it.strong{font-weight:650}
+  #rw-bar .arrow{color:#64708A;margin:0 9px}
+  #rw-bar .pill{padding:6px 9px;border-radius:6px;font-size:12px;font-weight:650;background:#E6F4EA;color:#1B7F3B}
+  #rw-bar .sp{flex:1}
+  #rw-bar .due{background:#FDECEC;color:#C62828;font-weight:700}
+  #rw-bar .paid{background:#E6F4EA;color:#1B7F3B;font-weight:700}
+
+  #rw-toggle{position:fixed;left:15px;bottom:15px;z-index:3;border:0;border-radius:9px;padding:9px 15px;font:600 12px Inter,system-ui,sans-serif;cursor:pointer;
+    box-shadow:0 6px 15px rgba(16,24,40,.18);background:#0E1A33;color:#fff}
+  html:not(.rw-on) #rw-toggle{background:#fff;color:#0E1A33;border:1px solid #E2E7F0}
+  html:not(.rw-btn) #rw-toggle{display:none}
+  
+  /* Action bar: a hidden, empty date row wrapped onto a 2nd line and pushed title + buttons up.
+     Keep it out of the flow so the row content is truly vertically centred. */
+  html.rw-on .mainNavbar .mainNavbar__content{flex-wrap:nowrap;position:relative}
+  html.rw-on .mainNavbar__content > .row{position:absolute;right:var(--g5);bottom:var(--g1);margin:0!important;width:auto;pointer-events:none}
+
+/* ===== Modals =====
+   Rentway modals reuse the page header markup (.docStyleTitle.main > .mainNavbar). They must never be
+   sticky (it pushed the title over the table headers, e.g. dashboard "Pré-Clos"): flat white header instead. */
+  html.rw-on .v-dialog .rw-head, html.rw-on .v-dialog .rw-tabs{position:static!important;padding-top:0!important}
+  html.rw-on .v-dialog{border-radius:var(--r3)!important;box-shadow:0 var(--g5) var(--g7) rgba(16,24,40,.28)!important}
+  html.rw-on .v-dialog .docStyleTitle.main:has(.mainNavbar){background:var(--rw-surface)!important;margin:0!important;border-bottom:1px solid var(--rw-line)}
+  html.rw-on .v-dialog .docStyleTitle.main:has(.mainNavbar) > [class*=col]{padding:0!important}
+  html.rw-on .v-dialog .mainNavbar{border:0!important;border-radius:0!important;background:transparent!important}
+  html.rw-on .v-dialog .mainNavbar__content_title{font-size:15px!important}
+
+/* ===== Calm loading ===== */
+
+  html.rw-calm :is(.v-overlay.above-all, .v-overlay:has(.loading-image)) .v-overlay__scrim{opacity:0!important;transition:none!important}
+  html.rw-calm :is(.v-overlay.above-all, .v-overlay:has(.loading-image)) .v-overlay__content{opacity:0!important;transition:none!important}
+  html.rw-calm :is(.v-overlay.above-all, .v-overlay:has(.loading-image)){cursor:progress}
+  #rw-progress{position:fixed;left:0;right:0;top:64px;height:3px;z-index:300;overflow:hidden;pointer-events:none;
+    opacity:0;transition:opacity .24s ease}
+  html.rw-calm #rw-progress.on{opacity:1}
+  #rw-progress::before{content:"";position:absolute;inset:0;background:rgba(0,65,171,.15)}
+  #rw-progress::after{content:"";position:absolute;top:0;bottom:0;left:-38%;width:38%;border-radius:3px;
+    background:linear-gradient(90deg,transparent,#0041AB 38%,#0041AB 62%,transparent);animation:rw-slide 1.3s cubic-bezier(.4,0,.2,1) infinite}
+  @keyframes rw-slide{to{left:100%}}
+  #rw-busy{position:fixed;left:50%;bottom:24px;transform:translate(-50%,9px);z-index:300;pointer-events:none;opacity:0;
+    display:flex;align-items:center;gap:9px;padding:9px 15px;border-radius:9px;background:#fff;border:1px solid #E2E7F0;
+    box-shadow:0 6px 24px rgba(16,24,40,.12);font:550 13px Inter,system-ui,sans-serif;color:#0E1A33;transition:opacity .24s ease,transform .24s ease}
+  html.rw-calm #rw-busy.on{opacity:1;transform:translate(-50%,0)}
+  #rw-busy i{width:15px;height:15px;border-radius:50%;border:2px solid #EAF0FC;border-top-color:#0041AB;animation:rw-spin .9s linear infinite}
+  @keyframes rw-spin{to{transform:rotate(360deg)}}
+  @media (prefers-reduced-motion: reduce){#rw-progress::after{animation:none;left:0;width:100%;opacity:.6}#rw-busy i{animation-duration:2.4s}}
+  
+/* ===== Tooltips & hover ===== */
+
+  html.rw-tips .v-tooltip__content{background:#0E1A33!important;color:#fff!important;border-radius:6px!important;padding:6px 9px!important;
+    font:550 12px/1.25 Inter,system-ui,sans-serif!important;box-shadow:0 6px 15px rgba(16,24,40,.2)!important;opacity:1;overflow:visible!important;white-space:nowrap}
+  html.rw-tips .v-tooltip__content.rw-tip-below::before, html.rw-tips .v-tooltip__content.rw-tip-above::before{content:"";position:absolute;left:var(--rw-arrow-x,50%);
+    width:9px;height:9px;background:#0E1A33;transform:translateX(-50%) rotate(45deg);border-radius:2px}
+  html.rw-tips .v-tooltip__content.rw-tip-below::before{top:-3px}
+  html.rw-tips .v-tooltip__content.rw-tip-above::before{bottom:-3px}
+  html.rw-tips .v-tooltip__content[data-rw-kbd]::after{content:attr(data-rw-kbd);margin-left:9px;padding:1px 6px;border-radius:3px;
+    background:rgba(255,255,255,.14);font-size:11px;font-weight:600;color:rgba(255,255,255,.85)}
+
+  /* Rounded, inset hover/press layer on tabs (Vuetify draws it with .v-btn::before) */
+  html.rw-on .secondNavbar__content button.btnnavbar::before{top:6px!important;bottom:6px!important;left:3px!important;right:3px!important;
+    border-radius:6px!important;background-color:#0E1A33!important}
+  html.rw-on .secondNavbar__content button.btnnavbar:hover::before{opacity:.05!important}
+  html.rw-on .secondNavbar__content button.btnnavbar:active::before{opacity:.09!important}
+  html.rw-on .secondNavbar__content button.btnnavbar:focus::before{opacity:0!important}
+  html.rw-on .secondNavbar__content button.btnnavbar:focus-visible{outline:none}
+  html.rw-on .secondNavbar__content button.btnnavbar:focus-visible::before{opacity:1!important;background:transparent!important;box-shadow:inset 0 0 0 2px #0041AB}
+  html.rw-on .mainNavbar__content_icons button:focus-visible{outline:2px solid #0041AB;outline-offset:2px}
+  
