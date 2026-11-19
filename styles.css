@@ -39,6 +39,13 @@
   html.rw-on .v-text-field>.v-input__control>.v-input__slot:before{border-color:var(--rw-line)!important;border-style:solid!important}
   html.rw-on .v-input.rw-empty{opacity:.4;transition:opacity .15s}
   html.rw-on .v-input.rw-empty:hover, html.rw-on .v-input.rw-empty:focus-within, html.rw-on .v-input.v-input--is-dirty.rw-empty{opacity:1}
+  /* Key field to fill first (Réservation nr. / Contrat nr. / Code impro, empty and editable — see flagKeys in content.js):
+     brand tint + ring drawn with box-shadow (no layout shift when it goes away at the first keystroke); never dimmed */
+  html.rw-on .v-input.rw-key, html.rw-on .v-input.rw-empty.rw-key{opacity:1}
+  html.rw-on .v-input.rw-key > .v-input__control > .v-input__slot{background:var(--rw-brand-soft)!important;border-radius:var(--r2)!important;
+    box-shadow:0 0 0 var(--g2) var(--rw-brand-soft),0 0 0 calc(var(--g2) + 2px) var(--rw-brand)!important}
+  html.rw-on .v-text-field.rw-key > .v-input__control > .v-input__slot:before{border-color:transparent!important}
+  html.rw-on .v-input.rw-key label, html.rw-on .v-input.rw-key .v-label{color:var(--rw-brand)!important;font-weight:650!important}
   html.rw-on .pa5.v-card .v-btn{border-radius:var(--r2)!important}
   html.rw-on .pa5.v-card .v-btn--disabled.v-btn--has-bg{background:transparent!important;border:1px solid var(--rw-line)!important;box-shadow:none!important;opacity:.55}
   html.rw-on .v-chip{border-radius:var(--r2)!important;padding:0 var(--g3)!important}

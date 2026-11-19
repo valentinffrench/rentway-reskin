@@ -19,6 +19,7 @@ Elle restyle les éléments existants et ajoute ses propres repères visuels, ma
 - Suppression du voile noir clignotant pendant les chargements, remplacé par une fine barre de progression. Le voile reste actif en arrière-plan pour bloquer les clics pendant le chargement.
 - Infobulles repositionnées sous les boutons.
 - Champs vides atténués, prix arrondis à 2 décimales dans le résumé.
+- **Champs à saisir en premier** mis en évidence (cadre bleu) tant qu'ils sont vides et modifiables : « Réservation nr. », « Contrat nr. », « Code impro ». Sur une nouvelle réservation, un nouveau contrat ou une impro, Rentway ne charge le reste de l'écran qu'une fois l'un d'eux rempli. Le cadre disparaît dès la première saisie ; jamais sur un champ verrouillé ni dans une fenêtre de recherche.
 - Fenêtres (modales) Rentway : fermeture avec la touche **Échap** ou un **clic à l'extérieur**. L'extension clique simplement sur le bouton de fermeture de la fenêtre : Rentway exécute exactement la même action qu'un clic manuel. Rien ne se passe si une liste déroulante ou un calendrier est ouvert, si une cellule de tableau est en cours d'édition ou pendant un chargement.
 - En-tête des fenêtres épuré (blanc) ; il ne recouvre plus les en-têtes de colonnes (ex. tableau de bord → Pré-Clos).
 
@@ -41,6 +42,7 @@ L'écran de démarrage (`/company-selector`) et la connexion ne sont jamais modi
 - Réglages **communs aux deux applications** : un changement dans le popup s'applique à tous les onglets Rentway ouverts, v1 et Pro. « Rentway d'origine » désactive tout partout.
 - Le popup reconnaît l'application de l'onglet et adapte ses libellés (la barre de résumé est propre à v1).
 - Les réglages choisis en v1.1 sont repris automatiquement.
+- Rentway v1 : champs à saisir en premier (Réservation nr., Contrat nr., Code impro) mis en évidence tant qu'ils sont vides.
 
 ## Installation (test sur un poste)
 
@@ -62,7 +64,7 @@ Icône de l'extension dans la barre Chrome → chaque fonction s'active séparé
 
 | Réglage | Rentway v1 | Rentway Pro |
 |---|---|---|
-| Nouveau design | En-tête fixe, onglets libellés, cartes, fenêtres | Retouches : onglets qui débordent, tableau de bord, champs vides, hauteur des tableaux |
+| Nouveau design | En-tête fixe, onglets libellés, cartes, fenêtres, champs à saisir en premier | Retouches : onglets qui débordent, tableau de bord, champs vides, hauteur des tableaux |
 | ↳ Barre de résumé | Bandeau de la réservation (nécessite le nouveau design) | — (Rentway v1 uniquement) |
 | Infobulles | Infobulles sous le bouton au lieu de le masquer | Boutons icônes, textes tronqués, raccourcis des onglets |
 | Bouton ON/OFF à l'écran | Bouton « Nouveau design » en bas à gauche | Bouton « Améliorations » en bas à gauche, à droite du menu |

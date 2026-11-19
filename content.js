@@ -94,6 +94,22 @@
     });
   }
 
+  // Key fields: on a new reservation / contract / impro, Rentway loads the rest of the screen only once one of them
+  // is filled in. While empty and editable they are highlighted (rw-key) so the agent sees where to start.
+  // Matched on their label, normalised (case, accents, "nr." / "n°" / "numéro", trailing "*"): never on the
+  // generated #input-NNNN ids, which change from one screen and one Rentway version to the next.
+  const KEY_FIELD = /^(?:(?:reservation|contrat) (?:nr|no|n°|num|numero)|(?:nr|no|n°|num|numero) (?:de )?(?:reservation|contrat)|code impro|impro code)$/;
+  const norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[.:*]/g, ' ').replace(/\s+/g, ' ').trim();
+  function flagKeys() {
+    document.querySelectorAll('.v-input').forEach(vi => {
+      const label = vi.querySelector('label');
+      const inp = vi.querySelector('input:not([type=hidden])');
+      const key = !!(label && inp && !vi.closest('.v-dialog') && KEY_FIELD.test(norm(label.textContent)));
+      setCls(vi, 'rw-key', key && !inp.value && !inp.disabled && !vi.classList.contains('v-input--is-dirty')
+        && !vi.classList.contains('v-input--is-disabled') && !vi.classList.contains('v-input--is-readonly'));
+    });
+  }
+
   // Summary bar keeps the last known values so it stays visible on every tab of the same booking
   let cache = {}, lastBar = '';
   function updateBar() {
@@ -128,7 +144,7 @@
     if (html !== lastBar) { bar.innerHTML = html; lastBar = html; }
   }
 
-  function apply() { tagLayout(); labelButtons(); formatPrices(); flagEmpty(); updateBar(); }
+  function apply() { tagLayout(); labelButtons(); formatPrices(); flagEmpty(); flagKeys(); updateBar(); }
 
   let raf = 0;
   const schedule = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(apply); };
@@ -160,8 +176,8 @@
     bar.remove(); toggle.remove();
     root.classList.remove('rw-scrolled');
     root.style.removeProperty('--rw-top'); root.style.removeProperty('--rw-headh');
-    document.querySelectorAll('.rw-empty,.rw-head,.rw-tabs,.rw-primary,.rw-labelled,.rw-danger')
-      .forEach(e => e.classList.remove('rw-empty', 'rw-head', 'rw-tabs', 'rw-primary', 'rw-labelled', 'rw-danger'));
+    document.querySelectorAll('.rw-empty,.rw-key,.rw-head,.rw-tabs,.rw-primary,.rw-labelled,.rw-danger')
+      .forEach(e => e.classList.remove('rw-empty', 'rw-key', 'rw-head', 'rw-tabs', 'rw-primary', 'rw-labelled', 'rw-danger'));
     document.querySelectorAll('[data-rw-label],[data-rw-kbd]').forEach(e => { e.removeAttribute('data-rw-label'); e.removeAttribute('data-rw-kbd'); });
     delete window.__rwRemove;
   };
