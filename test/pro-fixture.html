@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rentway | Démo</title>
+<!-- DEV ONLY — local stand-in for Rentway Pro (Vue 3 + DevExtreme), rebuilt from the classes observed on Pro v5.26.
+     All data is invented. It mimics Pro's markup AND the behaviours the extension depends on:
+     boot screen at /company-selector on every full load, white loader on route / tab changes, "What's new?" popup
+     that closes itself on Esc / outside click, a popup that does NOT, a confirmation dialog, a calendar dropdown.
+     Served by test/serve.mjs at any path; see test/README.md. -->
+<style>
+  :root{--base-accent:#0041ab;--base-text-color:#303030;--base-text-tertiary-color:#6c717a;--base-border-color:#ddd;
+    --base-panel-bg:#f8f9fc;--title-color:#1d2433;--button-primary:#4569ff;--tooltip-bg:#f2f7ff;--dx-color-primary:#0041ab}
+  html,body{margin:0;height:100%;overflow:hidden}
+  body{font:14px/1.4 Inter,system-ui,sans-serif;color:var(--base-text-color);background:#fff}
+  #app{height:100%} #root{position:relative;height:100%}
+  .app,.side-nav-outer-toolbar,.layout-body{height:100%}
+  .layout-body{display:flex;position:relative}
+  .dx-drawer-panel-content{position:absolute;left:0;top:0;bottom:0;width:60px;z-index:1501;background:#1d2433;color:#fff;
+    transition:width .2s;overflow:hidden;display:flex;flex-direction:column;align-items:flex-start;padding:9px 0}
+  .dx-drawer-panel-content.expanded{width:250px;box-shadow:6px 0 24px rgba(0,0,0,.25)}
+  .dx-drawer-panel-content .nav{display:flex;flex-direction:column;gap:4px;width:100%;margin-top:9px}
+  .dx-drawer-panel-content .nav a{color:#cfd6e4;text-decoration:none;white-space:nowrap;padding:6px 18px;font-size:13px}
+  .dx-drawer-panel-content .nav a:hover{background:rgba(255,255,255,.08)}
+  .menu-version{margin-top:auto;padding:6px 14px;font-size:11px;color:#9aa4b8}
+  .dx-drawer-content{margin-left:60px;flex:1;display:flex;flex-direction:column;min-width:0;height:100%}
+  section.banner{height:53px;display:flex;align-items:center;padding:0 18px;background:#fff8e1;border-bottom:1px dashed #c8a100;font-size:13px}
+  header.header-component{height:70px;flex:none;display:flex;align-items:center;gap:12px;padding:0 18px;border-bottom:1px solid var(--base-border-color);background:#fff}
+  header.header-component .search{flex:1;max-width:420px;height:36px;border:1px solid var(--base-border-color);border-radius:6px;padding:0 9px}
+  .dx-scrollable{flex:1;min-height:0;position:relative}
+  .dx-scrollable-wrapper,.dx-scrollable-container{height:100%}
+  .dx-scrollable-container{overflow:auto}
+  .app-content{padding:0 24px 24px}
+  .page-header-wrapper{position:sticky;top:0;z-index:4;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:12px 0;gap:12px}
+  .title-wrapper{display:flex;align-items:center;gap:12px}
+  h1.title{font-size:22px;margin:0;color:var(--title-color)}
+  .buttons{display:flex;gap:8px}
+  .dx-button{display:inline-flex;align-items:center;border:1px solid var(--base-border-color);border-radius:6px;cursor:pointer;background:#fff;user-select:none}
+  .dx-button-content{display:flex;align-items:center;gap:6px;padding:7px 12px}
+  .dx-button-has-icon:not(.dx-button-has-text) .dx-button-content{padding:7px}
+  .dx-button-default{background:var(--dx-color-primary);color:#fff;border-color:var(--dx-color-primary)}
+  .dx-button.dx-state-disabled{opacity:.45;pointer-events:none}
+  .dx-icon{font-style:normal;display:inline-block;width:18px;text-align:center}
+  .mdi-dots-vertical::before{content:"⋮"} .mdi-pencil-outline::before{content:"✎"} .mdi-magnify::before{content:"⌕"}
+  .mdi-eye-outline::before{content:"👁"} .mdi-bullhorn-outline::before{content:"📣"} .mdi-close::before,.dx-icon-close::before{content:"✕"}
+  .mdi-content-save::before{content:"💾"} .mdi-close-circle-outline::before{content:"⊗"} .dx-icon-chevrondoubleright::before{content:"»"}
+  .mdi-arrow-left::before{content:"←"} .dx-icon-export::before{content:"⇩"}
+  .card-status-wrapper{display:flex;gap:12px;margin:9px 0 15px}
+  .rw-card-status{flex:1;min-width:0;border:1px solid var(--base-border-color);border-radius:8px;padding:9px 12px}
+  .rw-card-status .label{margin:0;font-size:12px;color:var(--base-text-tertiary-color)}
+  .rw-card-status .value{margin:3px 0 6px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rw-card-status .line{height:3px;border-radius:2px;background:#9aa4b8} .rw-card-status .line.normal{background:#2e9d5b}
+  .rw-tabs.scrollbar-horizontal{display:flex;overflow-x:auto;white-space:nowrap;border-bottom:1px solid var(--base-border-color);margin-bottom:12px;max-width:760px}
+  a.rw-tab{flex:none;padding:10px 16px;cursor:pointer;color:var(--base-text-tertiary-color);border-bottom:2px solid transparent}
+  a.rw-tab-selected{color:var(--base-accent);border-bottom-color:var(--base-accent);font-weight:600}
+  a.rw-tab-disabled{opacity:.4;pointer-events:none}
+  .card-box{border:1px solid var(--base-border-color);border-radius:8px;padding:12px 15px;margin-bottom:15px;background:#fff}
+  .form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 18px}
+  .rw-form-element-label{display:block;font-size:12px;color:var(--base-text-tertiary-color);margin-bottom:3px}
+  .dx-texteditor{border:1px solid var(--base-border-color);border-radius:6px;display:flex;align-items:center;height:34px}
+  .dx-texteditor-container{flex:1;display:flex}
+  .dx-texteditor-input{border:0;outline:0;background:transparent;font:inherit;padding:0 9px;width:100%;color:inherit}
+  .dx-texteditor.dx-state-readonly,.dx-texteditor.dx-state-disabled{background:var(--base-panel-bg)}
+  .field-with-eye{display:flex;gap:6px;align-items:flex-end} .field-with-eye > .rw-select{flex:1}
+  .dashboard{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+  .card-box .title-wrapper{border-radius:6px;padding:3px 9px;margin-bottom:6px}
+  .title-wrapper.orange{background:#fdeedd} .title-wrapper.green{background:#e3f4ea} .title-wrapper.yellow{background:#fdf6d8} .title-wrapper.violet{background:#efe8fb}
+  .line-text{margin:4px 0;color:rgb(0,65,171)} .line-text.title,.line-text.number{color:rgb(82,82,82)} .line-text.title{font-weight:700}
+  .line-text.link{cursor:pointer}
+  .rw-grid.fr2{display:grid;grid-template-columns:1fr auto;column-gap:18px}
+  .data-table-margin{display:block;margin-top:6px}
+  .dx-datagrid{height:100%;display:flex;flex-direction:column;border:1px solid var(--base-border-color);border-radius:6px;overflow:hidden}
+  .dx-datagrid table{width:100%;border-collapse:collapse;table-layout:fixed}
+  .dx-datagrid td{padding:7px 9px;border-bottom:1px solid #eee;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dx-datagrid-headers td{font-weight:600;color:var(--base-text-tertiary-color);background:var(--base-panel-bg)}
+  .dx-datagrid-headers .dx-datagrid-text-content{display:block;overflow:hidden;text-overflow:ellipsis}
+  .dx-datagrid-filter-row input{width:100%;box-sizing:border-box;border:1px solid var(--base-border-color);border-radius:4px;padding:3px 6px;font:inherit}
+  .dx-datagrid-rowsview{flex:1;overflow:auto;min-height:0}
+  .dx-datagrid-pager{flex:none;display:flex;gap:6px;align-items:center;justify-content:flex-end;padding:7px 9px;border-top:1px solid #eee;font-size:13px}
+  .dx-datagrid-pager span{padding:2px 8px;border-radius:4px;cursor:pointer} .dx-datagrid-pager span.sel{background:#eaf0fc}
+  .dx-overlay-wrapper.dx-popup-wrapper{position:fixed;inset:0;z-index:1501}
+  .dx-overlay-wrapper.dx-popup-wrapper.dx-overlay-shader{background:rgba(29,36,51,.45)}
+  .dx-popup-wrapper > .dx-overlay-content{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:560px;max-width:90vw;background:#fff;border-radius:8px;box-shadow:0 18px 48px rgba(0,0,0,.25)}
+  .dx-popup-title{display:flex;justify-content:flex-end;padding:6px} .dx-toolbar-items-container{display:flex;width:100%} .dx-toolbar-after{margin-left:auto}
+  .dx-popup-content{padding:0 18px 18px}
+  .platform-messages .header{display:flex;justify-content:space-between;gap:12px} .platform-messages h1{font-size:20px;margin:0}
+  .dx-dropdowneditor-overlay{position:fixed;inset:auto;z-index:1503}
+  .dx-dropdowneditor-overlay > .dx-overlay-content{position:fixed;left:auto;top:auto;transform:none;width:240px;padding:12px;box-shadow:0 6px 18px rgba(0,0,0,.2)}
+  .loading-wrapper{position:absolute;inset:0;z-index:2147483646;background:rgba(255,255,255,.65);display:flex;align-items:center;justify-content:center}
+  .loading-wrapper .wrapper{display:flex;gap:6px}
+  .loading-wrapper .wrapper i{width:14px;height:14px;background:var(--base-accent);animation:sq .6s infinite alternate}
+  .loading-wrapper .wrapper i:nth-child(2){animation-delay:.2s} .loading-wrapper .wrapper i:nth-child(3){animation-delay:.4s}
+  @keyframes sq{to{opacity:.2;transform:scale(.6)}}
+  .boot{position:absolute;inset:0;display:flex;flex-direction:column;gap:18px;align-items:center;justify-content:center;background:#fff;z-index:5}
+  /* fixture controls live in the survey banner (the banner's place on Pro): dismiss it to see the page without them */
+  .fixture-tools{display:flex;gap:6px;flex:1;margin:0 12px} .fixture-tools button{font:12px Inter,system-ui,sans-serif;cursor:pointer}
+</style></head>
+<body class="dx-device-desktop">
+<div id="app"><div id="root"><div class="app screen-medium"><div class="side-nav-outer-toolbar">
+  <div class="layout-body dx-drawer">
+    <div class="dx-drawer-panel-content" id="nav">
+      <div role="button" aria-label="chevrondoubleright" class="dx-widget dx-button dx-button-mode-text dx-button-normal dx-button-has-icon" id="navToggle" style="margin-left:12px;color:#fff;background:transparent;border:0"><div class="dx-button-content"><i class="dx-icon dx-icon-chevrondoubleright"></i></div></div>
+      <div class="nav">
+        <a data-go="/dashboard">Dashboard</a>
+        <a data-go="/vehicle-details/1001">Fleet › Vehicle Details</a>
+        <a data-go="/dashboard/rental-agreements">Dashboard › Return RA</a>
+      </div>
+      <div class="menu-version">v5.26</div>
+    </div>
+    <div class="dx-drawer-content">
+      <div class="drawer-banner"><section class="banner"><b>Fixture (dev)</b>
+        <span class="fixture-tools"><button data-load="200">Chargement 200 ms</button><button data-load="800">800 ms</button><button data-load="2000">2 s</button>
+        <button id="openNews">« What's new? »</button><button id="openSticky">Fenêtre sans Échap</button><button id="openDialog">Confirmation</button></span>
+        <button class="banner__close" type="button" aria-label="Fermer le bandeau">✕</button></section></div>
+      <header class="header-component">
+        <input class="search" placeholder="Rechercher…   Ctrl K" aria-label="Recherche globale">
+        <div role="button" aria-label="mdi mdi-bullhorn-outline" class="dx-widget dx-button dx-button-mode-text dx-button-normal dx-button-has-icon" id="newsBtn"><div class="dx-button-content"><i class="dx-icon mdi mdi-bullhorn-outline"></i></div></div>
+        <span style="margin-left:auto;font-size:13px">Utilisateur Démo · Agence Démo</span>
+      </header>
+      <div class="dx-scrollable dx-scrollview"><div class="dx-scrollable-wrapper"><div class="dx-scrollable-container">
+        <div class="dx-scrollable-content"><div class="dx-scrollview-content">
+          <div class="app-content has-rw-page" id="page"></div>
+        </div></div>
+      </div></div></div>
+    </div>
+  </div>
+</div></div></div></div>
+
+
+<script>
+(() => {
+  const BASE = '/subscriptions/demo';
+  const page = document.getElementById('page');
+  const root = document.getElementById('root');
+  const $ = (s, r = document) => r.querySelector(s);
+
+  /* ---------- Pro behaviours ---------- */
+  // Loader: a .loading-wrapper added, then removed
+  function withLoader(ms) {
+    const l = document.createElement('div'); l.className = 'loading-wrapper';
+    l.innerHTML = '<div class="wrapper"><i></i><i></i><i></i></div>';
+    root.append(l); setTimeout(() => l.remove(), ms);
+  }
+  // Ctrl+K = global search (must keep working)
+  window.addEventListener('keydown', e => { if (e.ctrlKey && e.key.toLowerCase() === 'k') { e.preventDefault(); $('.search').focus(); } });
+  // Sidebar: 60 px, overlaps when expanded
+  $('#navToggle').onclick = () => $('#nav').classList.toggle('expanded');
+  $('.banner__close').onclick = () => $('.drawer-banner').remove();
+  document.querySelectorAll('[data-go]').forEach(a => a.onclick = () => go(a.dataset.go));
+
+  function btn(icon, text, extra = '') {
+    return `<div class="rw-button"><div role="button" class="dx-widget dx-button dx-button-mode-contained dx-button-normal ${text ? 'dx-button-has-text' : ''} dx-button-has-icon ${extra}"><div class="dx-button-content"><i class="dx-icon mdi ${icon}"></i>${text ? `<span class="dx-button-text">${text}</span>` : ''}</div></div></div>`;
+  }
+  function field(cls, label, value, readonly) {
+    const st = readonly ? ' dx-state-readonly' : '';
+    return `<div class="${cls}"><span class="rw-form-element-label" title="${label}"><span class="input-label">${label}</span></span>
+      <div class="${cls}-wrapper"><div class="dx-texteditor dx-widget dx-editor-outlined${value ? '' : ' dx-texteditor-empty'}${st}">
+      <div class="dx-texteditor-container"><input class="dx-texteditor-input" ${readonly ? 'readonly' : ''} aria-label="${label}" value="${value}"></div></div></div></div>`;
+  }
+
+  /* ---------- Pages ---------- */
+  const TABS = ['General data', 'Characteristics', 'History', 'Damages', 'Rent-a-car / Insurances', 'Documentation', 'Maintenance', 'Fines'];
+  const FIELDS = [['rw-text-field', 'Plate number', 'AA-123-BB'], ['rw-text-field', 'Chassis number', ''], ['rw-select', 'Model', 'DEMO CITADINE 5P'],
+    ['rw-date-picker', 'Registration date', '01/02/2026'], ['rw-number-field', 'Mileage', '12 345'], ['rw-text-field', 'Key number', ''],
+    ['rw-select', 'Owner', ''], ['rw-textarea', 'Notes', ''], ['rw-select-multiple', 'Equipment', '']];
+  let editing = false;
+  function vehicle() {
+    page.innerHTML = `
+      <div class="page-header-wrapper">
+        <div class="title-wrapper"><div class="text"><h1 class="title">Vehicle Details</h1></div>${btn('mdi-arrow-left', 'Switch to Vehicle Financial')}</div>
+        <div class="buttons" id="hdrButtons"></div>
+      </div>
+      <div class="content-wrapper"><div class="page-content">
+        <div class="card-status-wrapper">
+          <div class="rw-card-status"><p class="label">Plate number</p><p class="value"><span>AA-123-BB</span></p><div class="line default"></div></div>
+          <div class="rw-card-status"><p class="label">Status | Movement</p><p class="value"><span>Rental Agreement | 100042 — Agence Centre-Ville Principale</span></p><div class="line default"></div></div>
+          <div class="rw-card-status"><p class="label">Preparation</p><p class="value"><span>Not prepared</span></p><div class="line normal"></div></div>
+        </div>
+        <div class="rw-tabs scrollbar-horizontal tabs-wrapper">${TABS.map((t, i) => `<a class="rw-tab${i === 0 ? ' rw-tab-selected' : ''}">${t}</a>`).join('')}</div>
+        <div class="card-box" id="tabBody"></div>
+      </div></div>`;
+    headerButtons(); tabBody(0);
+    page.querySelectorAll('a.rw-tab').forEach((a, i) => a.onclick = () => {
+      page.querySelector('.rw-tab-selected')?.classList.remove('rw-tab-selected'); a.classList.add('rw-tab-selected');
+      withLoader(800); setTimeout(() => tabBody(i), 400);
+    });
+  }
+  function headerButtons() {
+    const b = $('#hdrButtons');
+    b.innerHTML = editing
+      ? `<div class="dx-widget dx-dropdownbutton"><div role="button" class="dx-widget dx-button dx-button-has-text dx-button-has-icon dx-state-disabled"><div class="dx-button-content"><i class="dx-icon mdi mdi-dots-vertical"></i><span class="dx-button-text">Actions</span></div></div></div>
+         ${btn('mdi-close-circle-outline', 'Cancel')}${btn('mdi-content-save', 'Save', 'dx-button-default')}`
+      : `<div class="dx-widget dx-dropdownbutton"><div role="button" class="dx-widget dx-button dx-button-has-text dx-button-has-icon"><div class="dx-button-content"><i class="dx-icon mdi mdi-dots-vertical"></i><span class="dx-button-text">Actions</span></div></div></div>
+         ${btn('mdi-pencil-outline', 'Edit')}${btn('mdi-magnify', 'Search Menu')}`;
+    b.querySelectorAll('.rw-button').forEach(r => r.onclick = () => {
+      const icon = r.querySelector('.dx-icon').className;
+      if (/pencil|close-circle|content-save/.test(icon)) { editing = /pencil/.test(icon); headerButtons(); tabBody(0); }
+    });
+  }
+  function tabBody(i) {
+    const body = $('#tabBody'); if (!body) return;
+    if (i !== 0) { body.innerHTML = `<p>Contenu de l'onglet « ${TABS[i]} » (démo).</p>`; return; }
+    body.innerHTML = `<div class="form-grid">${FIELDS.map(([c, l, v]) => field(c, l, v, !editing)).join('')}
+      <div class="field-with-eye">${field('rw-select', 'Pre-defined status', 'Available', !editing)}
+        <div role="button" aria-label="mdi mdi-eye-outline" class="dx-widget dx-button dx-button-mode-text dx-button-normal dx-button-has-icon"><div class="dx-button-content"><i class="dx-icon mdi mdi-eye-outline"></i></div></div></div></div>`;
+  }
+  function dashboard() {
+    const card = (color, title, lines) => `<div class="card-box"><div class="title-wrapper ${color}"><p class="line-text title">${title}</p></div><div class="rw-grid fr2">${
+      lines.map(([t, n, link]) => `<p class="line-text${link ? ' link' : ''}"${link ? ` data-go="${link}"` : ''}>${t}${link ? ' ↗' : ''}</p><p class="line-text number">${n}</p>`).join('')}</div></div>`;
+    page.innerHTML = `<div class="page-header-wrapper"><div class="title-wrapper"><div class="text"><h1 class="title">Dashboard</h1></div></div></div>
+      <div class="content-wrapper"><div class="page-content"><div class="dashboard">
+        ${card('orange', 'RESERVATIONS', [['Reservations', 7, '/dashboard/rental-agreements'], ['Reservations no-show', 0], ['Reservations on request', 0]])}
+        ${card('green', 'IMPROS', [['Open impros', 3], ['Closed today', 1]])}
+        ${card('yellow', 'RENTAL AGREEMENTS', [['Open RA', 12], ['Return RA', 5, '/dashboard/rental-agreements'], ['Late returns', 1]])}
+        ${card('violet', 'FLEET AND UTILIZATION', [['Fleet', 80], ['Available', 22], ['In preparation', 4]])}
+      </div></div></div>`;
+    page.querySelectorAll('[data-go]').forEach(a => a.onclick = () => go(a.dataset.go));
+  }
+  function drill() {
+    const ST = ['AGENCE CENTRE-VILLE PRINCIPALE', 'PTP / GARE MARITIME DU NORD', 'AGENCE ZONE INDUSTRIELLE EST'];
+    const rows = Array.from({ length: 30 }, (_, i) => `<tr class="dx-row dx-data-row dx-row-lines" role="row">
+      <td role="gridcell" aria-colindex="1" style="text-align:right">${100000 + i * 7}</td><td role="gridcell" aria-colindex="2">${ST[i % 3]}</td>
+      <td role="gridcell" aria-colindex="3">${ST[(i + 1) % 3]}</td><td role="gridcell" aria-colindex="4">0${(i % 9) + 1}/11/2026</td><td role="gridcell" aria-colindex="5">DEMO</td></tr>`).join('');
+    const cols = '<colgroup><col style="width:90px"><col style="width:150px"><col style="width:150px"><col style="width:110px"><col></colgroup>';
+    page.innerHTML = `<div class="dashboard-rental-agreement-page"><div class="page-header-wrapper"><div class="title-wrapper">${btn('mdi-arrow-left', 'Back')}<div class="text"><h1 class="title">Return RA</h1></div></div></div>
+      <div class="card-box">Période : du 01/11/2026 au 19/11/2026 (démo)</div>
+      <div class="data-table-margin dx-widget" style="height: 400px;"><div class="dx-datagrid dx-gridbase-container dx-datagrid-borders">
+        <div class="dx-datagrid-headers"><table>${cols}<tr><td><div class="dx-datagrid-text-content">RA number</div></td><td><div class="dx-datagrid-text-content">Departure station of the agreement</div></td><td><div class="dx-datagrid-text-content">Return station</div></td><td><div class="dx-datagrid-text-content">Return date</div></td><td><div class="dx-datagrid-text-content">Group</div></td></tr>
+        <tr class="dx-datagrid-filter-row"><td class="dx-editor-cell"><input aria-label="Filtre"></td><td class="dx-editor-cell"><input aria-label="Filtre"></td><td></td><td></td><td></td></tr></table></div>
+        <div class="dx-datagrid-rowsview dx-datagrid-nowrap dx-scrollable dx-scrollable-both dx-scrollable-simulated"><table>${cols}${rows}</table></div>
+        <div class="dx-datagrid-pager dx-pager"><span class="sel">1</span><span>2</span><span>3</span></div>
+      </div></div></div>`;
+    page.querySelector('.rw-button').onclick = () => history.back();
+    page.querySelectorAll('.dx-datagrid-pager span').forEach(s => s.onclick = () => {
+      page.querySelector('.dx-datagrid-pager .sel').classList.remove('sel'); s.classList.add('sel');
+    });
+  }
+
+  /* ---------- Router (history mode) + boot screen ---------- */
+  const ROUTES = { '/dashboard': [dashboard, 'Dashboard'], '/dashboard/rental-agreements': [drill, 'Return RA'], '/vehicle-details/1001': [vehicle, 'Vehicle Details : 1001'] };
+  function render() {
+    const r = decodeURIComponent(location.pathname).slice(BASE.length);
+    const [fn, title] = ROUTES[r] || ROUTES['/vehicle-details/1001'];
+    editing = false; fn(); document.title = `Rentway | Démo | ${title}`;
+    withLoader(800);
+  }
+  function go(r) { history.pushState(null, '', BASE + r); render(); }
+  window.addEventListener('popstate', render);
+  // Every full load goes through /company-selector (boot screen with the same squares) before routing in
+  const target = location.pathname.startsWith(BASE + '/') ? location.pathname : BASE + '/vehicle-details/1001';
+  history.replaceState(null, '', '/company-selector');
+  const boot = document.createElement('div'); boot.className = 'boot';
+  boot.innerHTML = '<div class="loading-wrapper" style="position:static;background:none"><div class="wrapper"><i></i><i></i><i></i></div></div><button type="button">Déconnexion</button>';
+  root.append(boot);
+  setTimeout(() => { boot.remove(); history.replaceState(null, '', target); render(); setTimeout(openNews, 900); }, 900);
+
+  /* ---------- Popups ---------- */
+  function popup(cls, inner, { esc = false, outside = false } = {}) {
+    const w = document.createElement('div');
+    w.className = `dx-overlay-wrapper dx-popup-wrapper dx-popup ${cls} dx-overlay-shader`; w.style.zIndex = '1502';
+    w.innerHTML = `<div class="dx-overlay-content dx-popup-normal dx-resizable">${inner}</div>`;
+    const close = () => { w.remove(); window.removeEventListener('keydown', onEsc); };
+    const onEsc = e => { if (esc && e.key === 'Escape' && !document.querySelector('.dx-dropdowneditor-overlay')) close(); };
+    window.addEventListener('keydown', onEsc);
+    if (outside) w.addEventListener('pointerdown', e => { if (e.target === w) close(); });
+    w.querySelectorAll('.dx-closebutton, .rw-button.close, [data-close]').forEach(b => b.onclick = close);
+    document.body.append(w); return w;
+  }
+  const titleBar = '<div class="dx-toolbar dx-widget dx-collection dx-popup-title dx-has-close-button"><div class="dx-toolbar-items-container"><div class="dx-toolbar-before"></div><div class="dx-toolbar-center"></div><div class="dx-toolbar-after"><div class="dx-item dx-toolbar-item dx-toolbar-button"><div class="dx-item-content dx-toolbar-item-content"><div role="button" aria-label="Fermer" class="dx-widget dx-button dx-button-mode-text dx-button-normal dx-button-has-icon dx-closebutton"><div class="dx-button-content"><i class="dx-icon dx-icon-close"></i></div></div></div></div></div></div></div>';
+  // "What's new?": closes on Esc and on an outside click by itself (observed on Pro)
+  function openNews() {
+    popup('platform-messages', `${titleBar}<div class="dx-popup-content dx-popup-content-scrollable"><div class="content rw-grid">
+      <div id="platform-messages-header" class="header rw-grid"><div class="texts rw-grid"><h1>What's new?</h1><p>Notes de version (démo).</p></div>
+      <div class="buttons"><div class="rw-button" data-close><div role="button" class="dx-widget dx-button dx-button-has-text"><div class="dx-button-content"><span class="dx-button-text">Mark As Read</span></div></div></div>
+      <div class="rw-button close"><div role="button" aria-label="mdi mdi-close" class="dx-widget dx-button dx-button-mode-contained dx-button-normal dx-button-has-icon"><div class="dx-button-content"><i class="dx-icon mdi mdi-close"></i></div></div></div></div></div>
+      <div id="platform-messages-content" class="main-content scrollbar-vertical"><p>…</p></div></div></div>`, { esc: true, outside: true });
+  }
+  // An editing popup that ignores Esc and outside clicks (the case P4 is a fallback for), with tabs and a calendar
+  function openSticky() {
+    const w = popup('rw-popup', `${titleBar}<div class="dx-popup-content"><h3 style="margin:0 0 9px">Fenêtre sans Échap (démo)</h3>
+      <div class="rw-tabs scrollbar-horizontal tabs-wrapper"><a class="rw-tab rw-tab-selected">Détail</a><a class="rw-tab">Historique</a><a class="rw-tab rw-tab-disabled">Verrouillé</a></div>
+      <p><button type="button" id="openCal">Ouvrir le calendrier</button> <span id="calInfo"></span></p></div>`);
+    w.querySelectorAll('a.rw-tab').forEach(a => a.onclick = () => { w.querySelector('.rw-tab-selected').classList.remove('rw-tab-selected'); a.classList.add('rw-tab-selected'); });
+    w.querySelector('#openCal').onclick = e => {
+      const r = e.target.getBoundingClientRect();
+      const d = document.createElement('div'); d.className = 'dx-overlay-wrapper dx-popup-wrapper dx-dropdowneditor-overlay';
+      d.innerHTML = `<div class="dx-overlay-content" style="left:${r.left}px;top:${r.bottom + 4}px">Calendrier (démo) — Échap le ferme</div>`;
+      document.body.append(d);
+      const k = ev => { if (ev.key === 'Escape') { d.remove(); window.removeEventListener('keydown', k); } };
+      window.addEventListener('keydown', k);
+    };
+  }
+  // DevExtreme confirmation: the extension must never answer it
+  function openDialog() {
+    const w = popup('dx-dialog-wrapper dx-dialog-root', `${titleBar}<div class="dx-popup-content dx-dialog-content"><div class="dx-dialog-message">Supprimer cet élément ? (démo)</div>
+      <p><button type="button" data-close>Oui</button> <button type="button" data-close>Non</button></p></div>`);
+    w.querySelectorAll('[data-close]').forEach(b => b.onclick = () => w.remove());
+  }
+  $('#newsBtn').onclick = openNews;
+  $('#openNews').onclick = openNews; $('#openSticky').onclick = openSticky; $('#openDialog').onclick = openDialog;
+  document.querySelectorAll('[data-load]').forEach(b => b.onclick = () => withLoader(+b.dataset.load));
+})();
+</script>
+</body></html>

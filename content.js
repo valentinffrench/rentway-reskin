@@ -1,35 +1,13 @@
-/* Rentway Reskin — CaribeCar · v1.1.0
-   Runs on rentwayv1.emotionmobility.com only. Never replaces Rentway elements: it restyles them,
-   adds labels/classes, and adds its own overlay elements, so every original interaction keeps working.
+/* Rentway Reskin — CaribeCar · v2.0.0
+   Rentway v1 module: runs on rentwayv1.emotionmobility.com only (Rentway Pro: see pro.js).
+   Never replaces Rentway elements: it restyles them, adds labels/classes, and adds its own overlay elements,
+   so every original interaction keeps working.
    Each enhancement can be switched on/off from the extension popup (settings: see early.js). */
 
 /* ---------- 0. Settings ---------- */
-// early.js (document_start) loaded the settings and set the matching classes on <html>.
-// Here we add change notifications, the popup messaging and cross-tab sync.
-(() => {
-  const cfg = window.__rwCfg;
-  if (!cfg || cfg.set) return;
-  const listeners = new Set();
-  cfg.is = k => !!cfg.settings[k];
-  cfg.onChange = fn => { listeners.add(fn); return () => listeners.delete(fn); };
-  const notify = () => listeners.forEach(fn => { try { fn(cfg.settings); } catch (e) {} });
-  cfg.set = patch => {
-    for (const k in patch) if (k in cfg.DEF) cfg.settings[k] = !!patch[k];
-    cfg.save(cfg.settings); cfg.applyClasses(cfg.settings); notify();
-  };
-  try {
-    chrome.runtime.onMessage.addListener((msg, _s, reply) => {
-      if (!msg) return;
-      if (msg.type === 'rw-set') cfg.set(msg.settings || { design: !!msg.on });
-      if (msg.type === 'rw-get' || msg.type === 'rw-set') reply({ settings: { ...cfg.settings }, on: cfg.is('design') });
-    });
-  } catch (e) {}
-  // a change made in another Rentway tab applies here too
-  window.addEventListener('storage', e => {
-    if (e.key !== cfg.KEY) return;
-    cfg.settings = cfg.load(); cfg.applyClasses(cfg.settings); notify();
-  });
-})();
+// early.js (document_start) owns the settings shared by Rentway v1 and Pro: it loads them, sets the matching
+// classes on <html>, answers the popup and keeps every Rentway tab (v1 and Pro) in sync through chrome.storage.
+// This script only uses its API: cfg.is(key), cfg.set(patch), cfg.onChange(fn).
 
 /* ---------- 1. Layout, labels, summary bar, shortcuts ---------- */
 (() => {

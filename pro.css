@@ -1,0 +1,88 @@
+/* Rentway Reskin — CaribeCar · v2.0.0 — Rentway Pro (rentway.emotionmobility.com)
+   Every rule on a Pro element is scoped to html.rwr-app (set by pro.js on in-app routes only, never on the
+   /company-selector boot screen) plus the class of one enhancement (set by early.js from the popup settings):
+   rwr-calm = calm loading · rwr-tips = tooltips · rwr-design = Pro polish · rwr-btn = on-screen button.
+   Switching an enhancement off restores that part of Pro exactly.
+   Prefix rwr- everywhere: Pro already owns rw-* for its own components.
+   Colours reuse Pro's own tokens (--base-accent, --title-color…) with the observed value as fallback. */
+
+/* ===== P1 · Calm loading =====
+   Pro's .loading-wrapper stays in place (it still blocks clicks on a half-loaded screen) but becomes see-through */
+html.rwr-app.rwr-calm .loading-wrapper{background:transparent!important;cursor:progress}
+html.rwr-app.rwr-calm .loading-wrapper > .wrapper{opacity:0!important}
+
+/* Bar under the app header (top set by pro.js), above Pro's loader (z-index 2147483646) */
+#rwr-progress{position:fixed;left:0;right:0;top:0;height:3px;z-index:2147483647;overflow:hidden;pointer-events:none;
+  opacity:0;transition:opacity .24s ease}
+html.rwr-calm #rwr-progress.on{opacity:1}
+#rwr-progress::before{content:"";position:absolute;inset:0;background:var(--base-accent,#0041ab);opacity:.15}
+#rwr-progress::after{content:"";position:absolute;top:0;bottom:0;left:-38%;width:38%;border-radius:3px;
+  background:linear-gradient(90deg,transparent,var(--base-accent,#0041ab) 38%,var(--base-accent,#0041ab) 62%,transparent);
+  animation:rwr-slide 1.3s cubic-bezier(.4,0,.2,1) infinite}
+@keyframes rwr-slide{to{left:100%}}
+#rwr-busy{position:fixed;left:50%;bottom:24px;transform:translate(-50%,9px);z-index:2147483647;pointer-events:none;opacity:0;
+  display:flex;align-items:center;gap:9px;padding:9px 15px;border-radius:9px;background:#fff;border:1px solid var(--base-border-color,#ddd);
+  box-shadow:0 6px 24px rgba(16,24,40,.12);font:550 13px Inter,system-ui,sans-serif;color:var(--title-color,#1d2433);
+  transition:opacity .24s ease,transform .24s ease}
+html.rwr-calm #rwr-busy.on{opacity:1;transform:translate(-50%,0)}
+#rwr-busy i{width:15px;height:15px;border-radius:50%;border:2px solid #EAF0FC;border-top-color:var(--base-accent,#0041ab);
+  animation:rwr-spin .9s linear infinite}
+@keyframes rwr-spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion: reduce){
+  #rwr-progress::after{animation:none;left:0;width:100%;opacity:.6}
+  #rwr-busy i{animation-duration:2.4s}
+}
+
+/* ===== P3 · Tooltips =====
+   Above popups (1501–1502), below the loader. Same look as v1's */
+#rwr-tip{position:fixed;left:0;top:0;z-index:1600;pointer-events:none;box-sizing:border-box;
+  display:flex;align-items:center;gap:9px;max-width:min(420px,calc(100vw - 18px));padding:6px 9px;border-radius:6px;
+  background:#1d2433;color:#fff;font:550 12px/1.35 Inter,system-ui,sans-serif;box-shadow:0 6px 15px rgba(16,24,40,.2);
+  overflow-wrap:anywhere;visibility:hidden;opacity:0;transition:opacity .12s ease}
+html.rwr-tips #rwr-tip.on{visibility:visible;opacity:1}
+#rwr-tip::before{content:"";position:absolute;left:var(--rwr-arrow-x,50%);width:9px;height:9px;background:#1d2433;
+  transform:translateX(-50%) rotate(45deg);border-radius:2px}
+#rwr-tip.below::before{top:-3px}
+#rwr-tip.above::before{bottom:-3px}
+#rwr-tip span{position:relative}
+#rwr-tip kbd{position:relative;flex:none;padding:1px 6px;border-radius:3px;background:rgba(255,255,255,.14);
+  font:600 11px/1.35 Inter,system-ui,sans-serif;color:rgba(255,255,255,.85)}
+#rwr-tip span:empty, #rwr-tip kbd:empty{display:none}
+
+/* ===== P5 · Pro polish ===== */
+
+/* a. Tab strips that overflow fade on the cut-off side (data-rwr-overflow set by pro.js) */
+html.rwr-app.rwr-design .rw-tabs[data-rwr-overflow=right]{
+  -webkit-mask-image:linear-gradient(to right,#000 calc(100% - 38px),transparent);
+          mask-image:linear-gradient(to right,#000 calc(100% - 38px),transparent)}
+html.rwr-app.rwr-design .rw-tabs[data-rwr-overflow=left]{
+  -webkit-mask-image:linear-gradient(to left,#000 calc(100% - 38px),transparent);
+          mask-image:linear-gradient(to left,#000 calc(100% - 38px),transparent)}
+html.rwr-app.rwr-design .rw-tabs[data-rwr-overflow=both]{
+  -webkit-mask-image:linear-gradient(to right,transparent,#000 38px,#000 calc(100% - 38px),transparent);
+          mask-image:linear-gradient(to right,transparent,#000 38px,#000 calc(100% - 38px),transparent)}
+
+/* b. Dashboard (/dashboard): every label is link blue, but only p.line-text.link reacts to a click */
+html.rwr-app.rwr-design.rwr-dash .card-box .line-text:not(.link):not(.title):not(.number){color:rgb(82,82,82);cursor:default}
+html.rwr-app.rwr-design.rwr-dash .card-box .line-text.link{cursor:pointer}
+html.rwr-app.rwr-design.rwr-dash .card-box .line-text.link:hover{text-decoration:underline}
+
+/* c. Empty read-only fields dimmed (view mode only: html.rwr-editing while Pro shows its Save button) */
+html.rwr-app.rwr-design .page-content :is(.rw-text-field,.rw-select,.rw-number-field,.rw-date-picker,.rw-textarea,.rw-select-multiple){
+  transition:opacity .15s}
+html.rwr-app.rwr-design:not(.rwr-editing) .page-content :is(.rw-text-field,.rw-select,.rw-number-field,.rw-date-picker,.rw-textarea,.rw-select-multiple):has(.dx-texteditor-empty:is(.dx-state-readonly,.dx-state-disabled)):not(:hover):not(:focus-within){
+  opacity:.45}
+
+/* d. Dashboard drill-down (/dashboard/…): the grid fills the screen instead of Pro's inline 400 px
+   (Pro's inline style is never rewritten: data-rwr-fill + --rwr-grid-h are set by pro.js) */
+html.rwr-app.rwr-design.rwr-drill .data-table-margin[data-rwr-fill]{height:var(--rwr-grid-h,400px)!important}
+
+/* ===== P6 · On-screen ON/OFF button =====
+   Right of the 60 px collapsed sidebar (v1's spot would cover its "v5.26" label); below every popup;
+   hidden while the sidebar is expanded (data-rwr-nav set by pro.js) */
+#rwr-toggle{position:fixed;left:75px;bottom:15px;z-index:1000;border:0;border-radius:9px;padding:9px 15px;
+  font:600 12px Inter,system-ui,sans-serif;cursor:pointer;box-shadow:0 6px 15px rgba(16,24,40,.18);
+  background:var(--title-color,#1d2433);color:#fff;transition:opacity .15s ease}
+html:not(.rwr-design) #rwr-toggle{background:#fff;color:var(--title-color,#1d2433);border:1px solid var(--base-border-color,#ddd)}
+#rwr-toggle:focus-visible{outline:2px solid var(--base-accent,#0041ab);outline-offset:2px}
+html:not(.rwr-btn) #rwr-toggle, #rwr-toggle[data-rwr-nav=open]{visibility:hidden;opacity:0;pointer-events:none}

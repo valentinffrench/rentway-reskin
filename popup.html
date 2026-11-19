@@ -28,21 +28,22 @@
   .off{color:var(--muted);padding:0 15px 15px;font-size:12px;display:none}
 </style></head>
 <body>
-  <header><img src="icons/icon32.png" alt=""><div><b>Rentway Reskin</b><small>CaribeCar · v1.1.0</small></div></header>
+  <!-- Rows carry their Rentway Pro wording in data-pro (applied by popup.js on a Pro tab) -->
+  <header><img src="icons/icon32.png" alt=""><div><b>Rentway Reskin</b><small>CaribeCar · v2.0.0<span id="site"></span></small></div></header>
 
   <h2>Apparence</h2>
-  <label class="row" for="design"><span>Nouveau design<small>En-tête fixe, onglets libellés, cartes, fenêtres</small></span><span class="sw"><input id="design" type="checkbox"><span></span></span></label>
-  <label class="row sub" for="summary"><span>Barre de résumé<small>Dates, agences, catégorie, solde</small></span><span class="sw"><input id="summary" type="checkbox"><span></span></span></label>
-  <label class="row" for="tips"><span>Infobulles repositionnées<small>Sous le bouton, au lieu de le masquer</small></span><span class="sw"><input id="tips" type="checkbox"><span></span></span></label>
-  <label class="row" for="button"><span>Bouton ON/OFF à l'écran<small>En bas à gauche de Rentway</small></span><span class="sw"><input id="button" type="checkbox"><span></span></span></label>
+  <label class="row" for="design"><span><span class="t">Nouveau design</span><small data-pro="Onglets, tableau de bord, champs vides">En-tête fixe, onglets libellés, cartes, fenêtres</small></span><span class="sw"><input id="design" type="checkbox"><span></span></span></label>
+  <label class="row sub" for="summary"><span><span class="t">Barre de résumé</span><small data-pro="Rentway v1 uniquement">Dates, agences, catégorie, solde</small></span><span class="sw"><input id="summary" type="checkbox"><span></span></span></label>
+  <label class="row" for="tips"><span><span class="t" data-pro="Infobulles">Infobulles repositionnées</span><small data-pro="Boutons icônes, textes tronqués">Sous le bouton, au lieu de le masquer</small></span><span class="sw"><input id="tips" type="checkbox"><span></span></span></label>
+  <label class="row" for="button"><span><span class="t">Bouton ON/OFF à l'écran</span><small>En bas à gauche de Rentway</small></span><span class="sw"><input id="button" type="checkbox"><span></span></span></label>
 
   <h2>Confort</h2>
-  <label class="row" for="loader"><span>Chargement discret<small>Fine barre au lieu du voile noir clignotant</small></span><span class="sw"><input id="loader" type="checkbox"><span></span></span></label>
-  <label class="row" for="modals"><span>Fermer les fenêtres<small>Touche Échap ou clic à l'extérieur</small></span><span class="sw"><input id="modals" type="checkbox"><span></span></span></label>
-  <label class="row" for="shortcuts"><span>Raccourcis clavier<small><kbd style="font:inherit">Alt</kbd> + 1…0 pour changer d'onglet</small></span><span class="sw"><input id="shortcuts" type="checkbox"><span></span></span></label>
+  <label class="row" for="loader"><span><span class="t">Chargement discret</span><small data-pro="Fine barre au lieu du voile blanc">Fine barre au lieu du voile noir clignotant</small></span><span class="sw"><input id="loader" type="checkbox"><span></span></span></label>
+  <label class="row" for="modals"><span><span class="t">Fermer les fenêtres</span><small>Touche Échap ou clic à l'extérieur</small></span><span class="sw"><input id="modals" type="checkbox"><span></span></span></label>
+  <label class="row" for="shortcuts"><span><span class="t">Raccourcis clavier</span><small><kbd style="font:inherit">Alt</kbd> + 1…0 pour changer d'onglet</small></span><span class="sw"><input id="shortcuts" type="checkbox"><span></span></span></label>
 
   <div class="presets"><button id="all" type="button">Tout activer</button><button id="none" type="button">Rentway d'origine</button></div>
-  <p class="hint">« Rentway d'origine » désactive tout : utile lors d'un appel au support. Les réglages sont mémorisés sur ce poste.</p>
-  <p class="off" id="na">Ouvrez (ou rechargez) un onglet Rentway pour utiliser ces réglages.</p>
+  <p class="hint">« Rentway d'origine » désactive tout, sur Rentway v1 comme sur Rentway Pro : utile lors d'un appel au support. Les réglages sont mémorisés sur ce poste et communs aux deux applications.</p>
+  <p class="off" id="na">Ouvrez (ou rechargez) un onglet Rentway, v1 ou Pro, pour utiliser ces réglages.</p>
   <script src="popup.js"></script>
 </body></html>
