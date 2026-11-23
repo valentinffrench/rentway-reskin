@@ -96,6 +96,7 @@ html.rwr-app.rwr-design.rwr-vac.rwr-vac-side #splitter-timeline > .dx-splitter-i
 html.rwr-app.rwr-design.rwr-vac.rwr-vac-side #splitter-timeline > .dx-splitter-item:last-child{
   flex:0 0 var(--rwr-vac-side-w,560px)!important;min-width:0;margin-left:12px;visibility:visible!important}
 html.rwr-app.rwr-design.rwr-vac.rwr-vac-side #splitter-timeline .reservations{padding-top:0;gap:6px}
+html.rwr-app.rwr-design.rwr-vac.rwr-vac-side #splitter-timeline .reservations .header{padding-left:15px}   /* room for the fold chevron */
 html.rwr-app.rwr-design.rwr-vac.rwr-vac-side #splitter-timeline .grid-reservations{visibility:visible!important}
 /* tighter cells in the panel (column widths: #rwr-vac-cols, sized to their content by pro.js) */
 html.rwr-app.rwr-design.rwr-vac.rwr-vac-side #grid-reservations td{padding-left:8px!important;padding-right:8px!important}
@@ -105,8 +106,8 @@ html.rwr-app.rwr-design.rwr-vac.rwr-vac-side.rwr-vac-rail #splitter-timeline > .
 html.rwr-app.rwr-design.rwr-vac.rwr-vac-side.rwr-vac-rail #splitter-timeline > .dx-splitter-item:last-child:hover{background:#f5f7fa}
 html.rwr-app.rwr-design.rwr-vac.rwr-vac-side.rwr-vac-rail #splitter-timeline .grid-reservations,
 html.rwr-app.rwr-design.rwr-vac.rwr-vac-side.rwr-vac-rail #splitter-timeline .reservations .header .rw-button{display:none!important}
-html.rwr-app.rwr-design.rwr-vac.rwr-vac-side.rwr-vac-rail #splitter-timeline .reservations{display:block;padding:12px 0 0}
-html.rwr-app.rwr-design.rwr-vac.rwr-vac-side.rwr-vac-rail #splitter-timeline .reservations .header{writing-mode:vertical-rl;margin:0 auto}
+html.rwr-app.rwr-design.rwr-vac.rwr-vac-side.rwr-vac-rail #splitter-timeline .reservations{display:block;padding:38px 0 0}
+html.rwr-app.rwr-design.rwr-vac.rwr-vac-side.rwr-vac-rail #splitter-timeline .reservations .header{writing-mode:vertical-rl;margin:0 auto;padding:0}
 /* our handle: a thin line that thickens on hover / drag, with a fold chevron at the top */
 #rwr-vac-grip{position:fixed;z-index:900;width:12px;cursor:col-resize;touch-action:none;outline:none}
 #rwr-vac-grip::before{content:"";position:absolute;left:5px;top:0;bottom:0;width:2px;border-radius:2px;background:rgba(0,0,0,.08);transition:background .15s,left .15s,width .15s}
