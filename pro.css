@@ -78,8 +78,8 @@ html.rwr-app.rwr-design:not(.rwr-editing) .page-content :is(.rw-text-field,.rw-s
 html.rwr-app.rwr-design.rwr-drill .data-table-margin[data-rwr-fill]{height:var(--rwr-grid-h,400px)!important}
 
 /* ===== P7 · Vehicle Allocation Control (planning screen, html.rwr-vac) =====
-   a. One screen, no page scroll: the splitter fills the visible height (--rwr-vac-h set by pro.js), Pro's inline
-      height is overridden, never rewritten. Paddings under the page and around the title are trimmed. */
+   a. One screen, no page scroll: the splitter fills the visible height (--rwr-vac-h set by pro.js); Pro's inline
+      styles are overridden, never rewritten. Paddings under the page and around the title are trimmed. */
 html.rwr-app.rwr-design.rwr-vac .app-content.has-rw-page{padding-bottom:0!important}
 html.rwr-app.rwr-design.rwr-vac .app-content .page-content{padding-bottom:0!important}
 html.rwr-app.rwr-design.rwr-vac .app-content .page-header-wrapper{padding:6px 0!important;margin-bottom:6px!important}
@@ -87,17 +87,51 @@ html.rwr-app.rwr-design.rwr-vac .app-content .page-header-wrapper h1.title{font-
 html.rwr-app.rwr-design.rwr-vac .page-content > .rw-grid:has(> #splitter-timeline){row-gap:9px!important}
 html.rwr-app.rwr-design.rwr-vac[style*="--rwr-vac-h"] .page-content > .rw-grid:has(> #splitter-timeline){grid-template-rows:auto var(--rwr-vac-h)!important}
 html.rwr-app.rwr-design.rwr-vac[style*="--rwr-vac-h"] #splitter-timeline{height:var(--rwr-vac-h)!important}
-html.rwr-app.rwr-design.rwr-vac #splitter-timeline .reservations{padding-top:9px;gap:6px}
-/* b. Reservations never disappear: open = at least header + 2 rows; collapsed = a 44 px bar that reopens on click */
-html.rwr-app.rwr-design.rwr-vac #splitter-timeline > .dx-splitter-item:last-child:not(.dx-splitter-item-hidden-content){
+
+/* b. Wide screen: reservations in a panel on the right (html.rwr-vac-side), timeline on the full height.
+      Pro's up/down handle is hidden; ours (#rwr-vac-grip) sits in the 12 px gap. */
+html.rwr-app.rwr-design.rwr-vac.rwr-vac-side #splitter-timeline{flex-direction:row!important}
+html.rwr-app.rwr-design.rwr-vac.rwr-vac-side #splitter-timeline > .dx-resize-handle{display:none!important}
+html.rwr-app.rwr-design.rwr-vac.rwr-vac-side #splitter-timeline > .dx-splitter-item:first-child{flex:1 1 0px!important;min-width:0}
+html.rwr-app.rwr-design.rwr-vac.rwr-vac-side #splitter-timeline > .dx-splitter-item:last-child{
+  flex:0 0 var(--rwr-vac-side-w,560px)!important;min-width:0;margin-left:12px;visibility:visible!important}
+html.rwr-app.rwr-design.rwr-vac.rwr-vac-side #splitter-timeline .reservations{padding-top:0;gap:6px}
+html.rwr-app.rwr-design.rwr-vac.rwr-vac-side #splitter-timeline .grid-reservations{visibility:visible!important}
+/* tighter cells in the panel (column widths: #rwr-vac-cols, sized to their content by pro.js) */
+html.rwr-app.rwr-design.rwr-vac.rwr-vac-side #grid-reservations td{padding-left:8px!important;padding-right:8px!important}
+/* folded into a 40 px rail: vertical title, grid and "Clear" hidden, click to open */
+html.rwr-app.rwr-design.rwr-vac.rwr-vac-side.rwr-vac-rail #splitter-timeline > .dx-splitter-item:last-child{cursor:pointer;
+  border:1px solid rgb(225,230,239);border-radius:6px;background:#fff}
+html.rwr-app.rwr-design.rwr-vac.rwr-vac-side.rwr-vac-rail #splitter-timeline > .dx-splitter-item:last-child:hover{background:#f5f7fa}
+html.rwr-app.rwr-design.rwr-vac.rwr-vac-side.rwr-vac-rail #splitter-timeline .grid-reservations,
+html.rwr-app.rwr-design.rwr-vac.rwr-vac-side.rwr-vac-rail #splitter-timeline .reservations .header .rw-button{display:none!important}
+html.rwr-app.rwr-design.rwr-vac.rwr-vac-side.rwr-vac-rail #splitter-timeline .reservations{display:block;padding:12px 0 0}
+html.rwr-app.rwr-design.rwr-vac.rwr-vac-side.rwr-vac-rail #splitter-timeline .reservations .header{writing-mode:vertical-rl;margin:0 auto}
+/* our handle: a thin line that thickens on hover / drag, with a fold chevron at the top */
+#rwr-vac-grip{position:fixed;z-index:900;width:12px;cursor:col-resize;touch-action:none;outline:none}
+#rwr-vac-grip::before{content:"";position:absolute;left:5px;top:0;bottom:0;width:2px;border-radius:2px;background:rgba(0,0,0,.08);transition:background .15s,left .15s,width .15s}
+#rwr-vac-grip:hover::before, #rwr-vac-grip.drag::before, #rwr-vac-grip:focus-visible::before{left:4px;width:4px;background:var(--base-accent,#0041ab)}
+#rwr-vac-grip button{position:absolute;left:-6px;top:4px;width:24px;height:24px;padding:0;margin:0;border:1px solid rgb(225,230,239);border-radius:12px;
+  background:#fff;color:var(--title-color,#1d2433);font-size:18px;line-height:22px;cursor:pointer;box-shadow:0 1px 3px rgba(16,24,40,.12)}
+#rwr-vac-grip button:hover{border-color:var(--base-accent,#0041ab);color:var(--base-accent,#0041ab)}
+#rwr-vac-grip button:focus-visible{outline:2px solid var(--base-accent,#0041ab);outline-offset:2px}
+html.rwr-vac-rail #rwr-vac-grip{cursor:default}
+html.rwr-vac-rail #rwr-vac-grip:hover::before{left:5px;width:2px;background:rgba(0,0,0,.08)}
+html:not(.rwr-design) #rwr-vac-grip, html:not(.rwr-vac-side) #rwr-vac-grip, #rwr-vac-grip[data-rwr-show=no]{display:none}
+
+/* c. Narrow screen (Pro's stacked layout): reservations never disappear. Open = at least header + 2 rows;
+      folded by Pro's ▼ = a 44 px bar that reopens on click */
+html.rwr-app.rwr-design.rwr-vac:not(.rwr-vac-side) #splitter-timeline .reservations{padding-top:9px;gap:6px}
+html.rwr-app.rwr-design.rwr-vac:not(.rwr-vac-side) #splitter-timeline > .dx-splitter-item:last-child:not(.dx-splitter-item-hidden-content){
   min-height:var(--rwr-vac-res-min,0px)}
-html.rwr-app.rwr-design.rwr-vac #splitter-timeline > .dx-splitter-item-hidden-content:last-child{visibility:visible;min-height:44px}
-html.rwr-app.rwr-design.rwr-vac #splitter-timeline > .dx-splitter-item-hidden-content:last-child .grid-reservations{visibility:hidden}
-html.rwr-app.rwr-design.rwr-vac #splitter-timeline > .dx-splitter-item-hidden-content:last-child .header{cursor:pointer}
-html.rwr-app.rwr-design.rwr-vac #splitter-timeline > .dx-splitter-item-hidden-content:last-child .header .title::after{
+html.rwr-app.rwr-design.rwr-vac:not(.rwr-vac-side) #splitter-timeline > .dx-splitter-item-hidden-content:last-child{visibility:visible;min-height:44px}
+html.rwr-app.rwr-design.rwr-vac:not(.rwr-vac-side) #splitter-timeline > .dx-splitter-item-hidden-content:last-child .grid-reservations{visibility:hidden}
+html.rwr-app.rwr-design.rwr-vac:not(.rwr-vac-side) #splitter-timeline > .dx-splitter-item-hidden-content:last-child .header{cursor:pointer}
+html.rwr-app.rwr-design.rwr-vac:not(.rwr-vac-side) #splitter-timeline > .dx-splitter-item-hidden-content:last-child .header .title::after{
   content:"▲ Afficher";margin-left:9px;font:600 12px Inter,system-ui,sans-serif;color:var(--base-accent,#0041ab)}
-html.rwr-app.rwr-design.rwr-vac #splitter-timeline > .dx-splitter-item-hidden-content:last-child .header:hover .title::after{text-decoration:underline}
-/* c. Focus mode: survey banner and app header hidden on this screen only */
+html.rwr-app.rwr-design.rwr-vac:not(.rwr-vac-side) #splitter-timeline > .dx-splitter-item-hidden-content:last-child .header:hover .title::after{text-decoration:underline}
+
+/* d. Focus mode (on by default): survey banner and app header hidden on this screen only */
 html.rwr-app.rwr-design.rwr-vac.rwr-vac-focus .dx-drawer-content > .drawer-banner,
 html.rwr-app.rwr-design.rwr-vac.rwr-vac-focus .dx-drawer-content > header.header-component{display:none!important}
 /* Focus button: looks like Pro's toolbar buttons; placed by pro.js; below every popup */

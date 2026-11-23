@@ -459,39 +459,57 @@
   })());
 
   /* ----- P7 · Vehicle Allocation Control, the planning screen (setting "design", html.rwr-vac) -----
-     Pro gives its splitter (timeline above, reservations below) a fixed height of window height - 213 px, taken once
-     when the screen opens. It ignores the banner and the page paddings, so the splitter always runs past the bottom
-     of the screen: the page scrolls around two panes that scroll themselves (nested scrolls), the timeline is short,
-     and the reservation rows sit below the fold. Collapsing or shrinking the reservations pushes them (and the handle
-     that brings them back) off screen.
-     a. One screen, no page scroll: the splitter fills exactly the visible height (recomputed live: resize, banner
-        closed, focus mode, our ON/OFF button). The timeline and the reservation grid keep their own scroll; they are
-        side by side, never nested.
-     b. Reservations never disappear: open, the pane keeps at least its header + 2 rows; collapsed (Pro's ▼), it stays
-        as a 44 px bar, and a click on that bar runs Pro's own ▲.
-     c. Focus mode (our button left of "Expand vehicles", remembered on this computer): hides the survey banner and
-        the app header (search, account) on this screen only, for about 120 px more planning. Esc leaves it.
-     The splitter's inline height and Pro's split ratio are never rewritten: pro.css overrides the height with
-     --rwr-vac-h, Pro's own drag and ▲/▼ keep working. One resize event lets the grids lay themselves out again. */
+     Pro stacks its splitter (timeline above, reservations below) and gives it a fixed height of window height - 213 px,
+     taken once when the screen opens. It ignores the banner and the page paddings: the splitter always runs past the
+     bottom of the screen, the page scrolls around two panes that scroll themselves (nested scrolls), the timeline is
+     short and the reservation rows sit below the fold.
+     The planning is the work surface: it gets the whole height, by default.
+     a. One screen, no page scroll: the splitter fills exactly the visible height, recomputed live (resize, banner
+        closed, focus mode, our ON/OFF button). Each pane keeps its own scroll; they are side by side, never nested.
+     b. Wide screen (splitter ≥ 1100 px): the reservations move to a panel on the right and the timeline takes the full
+        height. Pro's handle is hidden (it only drags up/down); ours sits between the panes: drag (or ←/→) for the
+        width, double-click for the default width, its chevron folds the panel into a 40 px rail (a click on the rail
+        opens it again). Width and fold are remembered on this computer. In the panel, grid columns are sized to their
+        content (our own <style>, recomputed when the rows change) and the cell padding is tightened.
+     c. Narrow screen: Pro's stacked layout, fitted to the screen; the reservations keep at least their header + 2 rows,
+        and once folded by Pro's ▼ they stay as a 44 px bar at the bottom that runs Pro's own ▲ on click.
+     d. Focus mode, on by default (our button left of "Expand vehicles"): hides the survey banner and the app header
+        (search, account) on this screen only. Esc or the button leaves it; the choice is remembered.
+     The splitter's inline styles and Pro's split ratio are never rewritten: pro.css overrides them with --rwr-vac-*
+     variables and .rwr-vac-side, so switching the setting off gives Pro's screen back as it was. */
   modules.push((() => {
     const SCROLLER = '.dx-drawer-content > .dx-scrollable > .dx-scrollable-wrapper > .dx-scrollable-container';
-    const GAP = 9, MIN_SPLIT = 300, RES_ROWS = 2, FOCUS_KEY = 'rwrVacFocus';
-    let h = 0, resMin = 0, measuredMin = 0, btn = null, icon = null, label = null;
+    const GAP = 9, MIN_SPLIT = 300, RES_ROWS = 2;
+    const SIDE_FROM = 1100, TIMELINE_MIN = 720, PANEL_MIN = 360, PANEL_DEF = 560, RAIL = 40, STEP = 24;
+    const K_FOCUS = 'rwrVacFocus', K_W = 'rwrVacSideW', K_RAIL = 'rwrVacSideRail';
+    const read = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+    const write = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} };
+    let h = 0, resMin = 0, measuredMin = 0, side = false, panelW = 0, colsKey = '';
+    let btn = null, icon = null, label = null, grip = null, fold = null, colsStyle = null, drag = null, dragT = 0;
+    const splitter = () => document.querySelector('.app-content #splitter-timeline');
     const lastPane = sp => sp.querySelector(':scope > .dx-splitter-item:last-child');
-    const collapsed = pane => !!pane && pane.classList.contains('dx-splitter-item-hidden-content');
+    const proFolded = pane => !!pane && pane.classList.contains('dx-splitter-item-hidden-content');
     const focusOn = () => root.classList.contains('rwr-vac-focus');
-    const readFocus = () => { try { return localStorage.getItem(FOCUS_KEY) === '1'; } catch (e) { return false; } };
+    const railOn = () => root.classList.contains('rwr-vac-rail');
+    const wantedW = () => { const n = parseInt(read(K_W), 10); return n > 0 ? n : PANEL_DEF; };
+    const relayout = () => window.dispatchEvent(new Event('resize'));   // DayPilot and DevExtreme lay out again
+
     function setFocus(on) {
       if (on === focusOn()) return;
       root.classList.toggle('rwr-vac-focus', on);
-      try { on ? localStorage.setItem(FOCUS_KEY, '1') : localStorage.removeItem(FOCUS_KEY); } catch (e) {}
-      window.dispatchEvent(new Event('resize'));   // Pro's page scroller measures its new height
+      write(K_FOCUS, on ? '1' : '0');
+      relayout();
       requestAnimationFrame(() => { fit(true); place(); });
     }
+    function setRail(on) {
+      root.classList.toggle('rwr-vac-rail', on);
+      write(K_RAIL, on ? '1' : null);
+      fit(true); place();
+    }
 
-    // a + b. Splitter height = visible bottom of the page scroller (above our ON/OFF button when it overlaps) - its top
+    // a + b + c. Height = visible bottom of the page scroller (above our ON/OFF button when it overlaps) - splitter top
     function fit(force) {
-      const sp = document.querySelector('.app-content #splitter-timeline'), sc = document.querySelector(SCROLLER);
+      const sp = splitter(), sc = document.querySelector(SCROLLER);
       if (!root.classList.contains('rwr-vac') || !sp || !sc) { release(); return; }
       const scR = sc.getBoundingClientRect(), spR = sp.getBoundingClientRect();
       let limit = scR.bottom - GAP;
@@ -500,62 +518,145 @@
         const t = tg.getBoundingClientRect();
         if (t.height && t.right > spR.left && t.left < spR.right) limit = Math.min(limit, t.top - GAP);
       }
-      const next = Math.max(MIN_SPLIT, Math.floor(limit - spR.top));
-      // floor of the open reservations pane: its header and the grid headers + 2 rows, measured while open
-      const pane = lastPane(sp), res = pane && pane.querySelector('.reservations'), rv = res && res.querySelector('.dx-datagrid-rowsview');
-      if (res && rv && !collapsed(pane)) {
-        const row = res.querySelector('.dx-data-row');
-        const rowH = row ? row.getBoundingClientRect().height : 28;
-        const m = Math.ceil(rv.getBoundingClientRect().top - res.getBoundingClientRect().top + RES_ROWS * rowH + 4);
-        if (m > 0) measuredMin = m;
+      const nextH = Math.max(MIN_SPLIT, Math.floor(limit - spR.top));
+      const nextSide = spR.width >= SIDE_FROM;
+      let nextW = 0, nextMin = 0;
+      if (nextSide) {
+        nextW = railOn() ? RAIL : Math.max(PANEL_MIN, Math.min(drag ? drag.w : wantedW(), Math.floor(spR.width) - TIMELINE_MIN));
+      } else {
+        // floor of the open stacked reservations: their header and the grid headers + 2 rows, measured while open
+        const pane = lastPane(sp), res = pane && pane.querySelector('.reservations'), rv = res && res.querySelector('.dx-datagrid-rowsview');
+        if (res && rv && !proFolded(pane)) {
+          const row = res.querySelector('.dx-data-row');
+          const m = Math.ceil(rv.getBoundingClientRect().top - res.getBoundingClientRect().top + RES_ROWS * (row ? row.getBoundingClientRect().height : 28) + 4);
+          if (m > 0) measuredMin = m;
+        }
+        nextMin = Math.min(measuredMin, Math.floor(nextH / 2));   // the timeline always keeps at least half
       }
-      const nextMin = Math.min(measuredMin, Math.floor(next / 2));   // the timeline always keeps at least half
-      if (!force && next === h && nextMin === resMin) return;
-      const changed = next !== h;
-      h = next; resMin = nextMin;
+      if (!force && nextH === h && nextSide === side && nextW === panelW && nextMin === resMin) { cols(); return; }
+      const changed = nextH !== h || nextSide !== side || nextW !== panelW;
+      h = nextH; side = nextSide; panelW = nextW; resMin = nextMin;
+      root.classList.toggle('rwr-vac-side', side);
       root.style.setProperty('--rwr-vac-h', h + 'px');
       root.style.setProperty('--rwr-vac-res-min', resMin + 'px');
-      if (changed) window.dispatchEvent(new Event('resize'));
+      if (side) root.style.setProperty('--rwr-vac-side-w', panelW + 'px'); else root.style.removeProperty('--rwr-vac-side-w');
+      cols();
+      if (changed && !drag) relayout();
     }
     function release() {
+      clearCols();
       if (!h) return;
-      h = resMin = 0;
-      root.style.removeProperty('--rwr-vac-h'); root.style.removeProperty('--rwr-vac-res-min');
-      window.dispatchEvent(new Event('resize'));
+      h = resMin = panelW = 0; side = false;
+      root.classList.remove('rwr-vac-side');
+      ['--rwr-vac-h', '--rwr-vac-res-min', '--rwr-vac-side-w'].forEach(p => root.style.removeProperty(p));
+      relayout();
     }
 
-    // c. Focus button: our own element, fixed, aligned left of Pro's "Expand vehicles / Statuses" group
+    // b. Side panel columns sized to their content: header label (capped) or the widest visible cell
+    const textW = el => { const r = document.createRange(); r.selectNodeContents(el); return r.getBoundingClientRect().width; };
+    function clearCols() { if (colsStyle) { colsStyle.remove(); colsStyle = null; } colsKey = ''; }
+    function cols() {
+      const grid = side && !railOn() && document.querySelector('.app-content #grid-reservations');
+      const head = grid && grid.querySelector('.dx-datagrid-headers .dx-header-row');
+      if (!head) { clearCols(); return; }
+      const rows = [...grid.querySelectorAll('.dx-datagrid-rowsview .dx-data-row')];
+      const key = head.children.length + '|' + rows.length + '|' + rows.slice(0, 40).map(r => r.textContent).join('¦');
+      if (key === colsKey) return;
+      colsKey = key;
+      const widths = [...head.children].map((th, i) => {
+        if (i === 0 && th.offsetWidth <= 40) return 0;   // Pro's drag-handle column keeps its own 30 px
+        const label = th.querySelector('.dx-datagrid-text-content');
+        let w = Math.min(label ? textW(label) + 34 : 0, 118);   // label + sort / filter icons, capped
+        for (const r of rows.slice(0, 40)) { const td = r.children[i]; if (td) w = Math.max(w, textW(td) + 18); }
+        return Math.ceil(Math.max(44, Math.min(w, 240)));
+      });
+      if (!colsStyle) { colsStyle = document.createElement('style'); colsStyle.id = 'rwr-vac-cols'; document.head.append(colsStyle); }
+      const sel = 'html.rwr-app.rwr-design.rwr-vac.rwr-vac-side:not(.rwr-vac-rail) #grid-reservations';
+      colsStyle.textContent = widths.map((w, i) => w ? `${sel} col:nth-child(${i + 1}){width:${w}px!important}` : '').join('\n');
+      relayout();   // the grid's own scrollbars measure the new table width
+    }
+
+    // b. Our handle between the panes, and d. the focus button: our own elements, fixed, placed on every pass
     function place() {
       if (!btn) return;
+      const sp = splitter();
       const f = root.classList.contains('rwr-vac') && document.querySelector('.app-content .timeline-header .filters');
       const v = f && document.querySelector('.app-content .timeline-header .views');
       const fr = f && f.getBoundingClientRect();
-      if (!fr || !fr.height || helperOpen()) { setAttr(btn, 'data-rwr-show', 'no'); return; }
-      setAttr(btn, 'data-rwr-show', 'yes');   // displayed before measuring; placed in the same frame, so no flash
-      const on = focusOn();
-      setAttr(icon, 'class', 'mdi ' + (on ? 'mdi-fullscreen-exit' : 'mdi-fullscreen'));
-      const text = on ? 'Quitter le plein écran' : 'Plein écran';
-      if (label.textContent !== text) label.textContent = text;
-      setAttr(btn, 'aria-pressed', String(on));
-      setAttr(btn, 'aria-label', on ? 'Quitter le plein écran (Échap)' : 'Plein écran : plus de place pour le planning');
-      // full label if it fits between the date / scale fields and Pro's buttons, else icon only
-      setAttr(btn, 'data-rwr-compact', 'no');
-      const room = fr.left - (v ? v.getBoundingClientRect().right : 0) - 2 * GAP;
-      if (btn.offsetWidth > room) setAttr(btn, 'data-rwr-compact', 'yes');
-      if (btn.getAttribute('data-rwr-compact') === 'yes') setAttr(btn, 'title', label.textContent); else btn.removeAttribute('title');
-      btn.style.height = Math.round(fr.height) + 'px';
-      btn.style.top = Math.round(fr.top) + 'px';
-      btn.style.left = Math.round(fr.left - 16 - btn.offsetWidth) + 'px';
+      if (!fr || !fr.height || helperOpen()) setAttr(btn, 'data-rwr-show', 'no');
+      else {
+        setAttr(btn, 'data-rwr-show', 'yes');   // displayed before measuring; placed in the same frame, so no flash
+        const on = focusOn();
+        setAttr(icon, 'class', 'mdi ' + (on ? 'mdi-fullscreen-exit' : 'mdi-fullscreen'));
+        const text = on ? 'Quitter le plein écran' : 'Plein écran';
+        if (label.textContent !== text) label.textContent = text;
+        setAttr(btn, 'aria-pressed', String(on));
+        setAttr(btn, 'aria-label', on ? 'Quitter le plein écran (Échap)' : 'Plein écran : plus de place pour le planning');
+        setAttr(btn, 'data-rwr-compact', 'no');
+        const room = fr.left - (v ? v.getBoundingClientRect().right : 0) - 2 * GAP;
+        if (btn.offsetWidth > room) setAttr(btn, 'data-rwr-compact', 'yes');
+        if (btn.getAttribute('data-rwr-compact') === 'yes') setAttr(btn, 'title', text); else btn.removeAttribute('title');
+        btn.style.height = Math.round(fr.height) + 'px';
+        btn.style.top = Math.round(fr.top) + 'px';
+        btn.style.left = Math.round(fr.left - 16 - btn.offsetWidth) + 'px';
+      }
+      const pane = side && sp && lastPane(sp), pr = pane && pane.getBoundingClientRect();
+      if (!pr || !pr.height || helperOpen()) { setAttr(grip, 'data-rwr-show', 'no'); return; }
+      setAttr(grip, 'data-rwr-show', 'yes');
+      const rail = railOn();
+      grip.style.left = Math.round(pr.left - 12) + 'px';
+      grip.style.top = Math.round(pr.top) + 'px';
+      grip.style.height = Math.round(pr.height) + 'px';
+      setAttr(grip, 'aria-valuenow', String(panelW));
+      setAttr(fold, 'class', 'mdi ' + (rail ? 'mdi-chevron-left' : 'mdi-chevron-right'));
+      setAttr(fold, 'title', rail ? 'Afficher les réservations' : 'Replier les réservations');
+      setAttr(fold, 'aria-label', fold.getAttribute('title'));
+      setAttr(fold, 'aria-expanded', String(!rail));
     }
 
-    // b. A click on the collapsed reservations bar (not on Pro's "Clear") = Pro's own ▲
+    // b. Drag / keys on our handle
+    const onGripDown = e => {
+      if (e.button !== 0 || e.target === fold || railOn()) return;
+      e.preventDefault();
+      grip.setPointerCapture(e.pointerId);
+      drag = { x: e.clientX, from: panelW, w: panelW };
+      grip.classList.add('drag');
+    };
+    const onGripMove = e => {
+      if (!drag) return;
+      const sp = splitter(); if (!sp) return;
+      const max = Math.floor(sp.getBoundingClientRect().width) - TIMELINE_MIN;
+      drag.w = Math.max(PANEL_MIN, Math.min(max, drag.from + (drag.x - e.clientX)));
+      root.style.setProperty('--rwr-vac-side-w', drag.w + 'px'); panelW = drag.w; place();
+      if (!dragT) dragT = setTimeout(() => { dragT = 0; relayout(); }, 120);   // live, but not on every pixel
+    };
+    const onGripUp = () => {
+      if (!drag) return;
+      write(K_W, String(drag.w)); drag = null; grip.classList.remove('drag');
+      clearTimeout(dragT); dragT = 0; colsKey = ''; fit(true); relayout();
+    };
+    const onGripKey = e => {
+      if (e.target !== grip || railOn()) return;
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        write(K_W, String(Math.max(PANEL_MIN, panelW + (e.key === 'ArrowLeft' ? STEP : -STEP))));
+        fit(true); place();
+      } else if (e.key === 'Home') { e.preventDefault(); write(K_W, null); fit(true); place(); }
+    };
+    const onGripDbl = e => { if (e.target !== fold && !railOn()) { write(K_W, null); fit(true); place(); } };
+
+    // b. A click on the side rail opens the panel; c. a click on the stacked folded bar runs Pro's own ▲.
+    // Never on Pro's "Clear" button.
     const onClick = e => {
-      const pane = e.target.closest && e.target.closest('#splitter-timeline > .dx-splitter-item-hidden-content:last-child');
-      if (!pane || e.target.closest('.rw-button, .dx-button, button')) return;
+      if (!e.target.closest || e.target.closest('.rw-button, .dx-button, button')) return;
+      const pane = e.target.closest('#splitter-timeline > .dx-splitter-item:last-child');
+      if (!pane) return;
+      if (side) { if (railOn()) setRail(false); return; }
+      if (!proFolded(pane)) return;
       const up = pane.parentElement.querySelector(':scope > .dx-resize-handle .dx-resize-handle-collapse-prev-pane');
       if (up) up.click();
     };
-    // c. Esc leaves focus mode, only when nothing else could want the key (popup, dropdown, field, load)
+    // d. Esc leaves focus mode, only when nothing else could want the key (popup, dropdown, field, load)
     const onKey = e => {
       if (e.key !== 'Escape' || !focusOn() || e.defaultPrevented || topPopup() || helperOpen() || loading()) return;
       const a = document.activeElement;
@@ -572,22 +673,36 @@
         icon = document.createElement('i'); label = document.createElement('span');
         btn.append(icon, label); setAttr(btn, 'data-rwr-show', 'no');
         btn.addEventListener('click', () => setFocus(!focusOn()));
-        document.body.append(btn);
-        if (readFocus()) root.classList.add('rwr-vac-focus');
+        grip = document.createElement('div'); grip.id = 'rwr-vac-grip'; grip.tabIndex = 0;
+        grip.setAttribute('role', 'separator'); grip.setAttribute('aria-orientation', 'vertical');
+        grip.setAttribute('aria-label', 'Largeur des réservations (← →, Début : par défaut)');
+        grip.setAttribute('title', 'Glisser pour élargir ou réduire · double-clic : largeur par défaut');
+        fold = document.createElement('button'); fold.type = 'button';
+        fold.addEventListener('click', () => setRail(!railOn()));
+        grip.append(fold); setAttr(grip, 'data-rwr-show', 'no');
+        grip.addEventListener('pointerdown', onGripDown);
+        grip.addEventListener('pointermove', onGripMove);
+        grip.addEventListener('pointerup', onGripUp);
+        grip.addEventListener('pointercancel', onGripUp);
+        grip.addEventListener('keydown', onGripKey);
+        grip.addEventListener('dblclick', onGripDbl);
+        document.body.append(btn, grip);
+        if (read(K_FOCUS) !== '0') root.classList.add('rwr-vac-focus');   // on by default
+        if (read(K_RAIL) === '1') root.classList.add('rwr-vac-rail');
         document.addEventListener('click', onClick, true);
         window.addEventListener('keydown', onKey, false);
         window.addEventListener('resize', onResize);
+        if (focusOn()) relayout();
         pass();
       },
       remove() {
         document.removeEventListener('click', onClick, true);
         window.removeEventListener('keydown', onKey, false);
         window.removeEventListener('resize', onResize);
-        btn.remove(); btn = icon = label = null;
-        const had = focusOn();
-        root.classList.remove('rwr-vac-focus');   // the saved choice stays for next time
+        clearTimeout(dragT); dragT = 0; drag = null;
+        btn.remove(); grip.remove(); btn = icon = label = grip = fold = null;
+        root.classList.remove('rwr-vac-focus', 'rwr-vac-rail');   // the saved choices stay for next time
         release();
-        if (had) window.dispatchEvent(new Event('resize'));
       },
       onMutate: pass,
       onRoute() { fit(true); place(); },
@@ -670,7 +785,7 @@
     bodyObs.disconnect(); titleObs.disconnect(); offChange(); cancelAnimationFrame(raf);
     window.removeEventListener('popstate', checkRoute);
     modules.forEach(m => { if (m.on) { m.on = false; safe(() => m.remove()); } });
-    root.classList.remove('rwr-app', 'rwr-dash', 'rwr-drill', 'rwr-vac', 'rwr-vac-focus', 'rwr-editing');
+    root.classList.remove('rwr-app', 'rwr-dash', 'rwr-drill', 'rwr-vac', 'rwr-vac-focus', 'rwr-vac-rail', 'rwr-vac-side', 'rwr-editing');
     delete window.__rwrRemove;
   };
 })();
