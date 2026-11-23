@@ -1,4 +1,4 @@
-/* Rentway Reskin — CaribeCar · v2.0.0
+/* Rentway Reskin — CaribeCar · v2.1.0
    Rentway Pro module: runs on rentway.emotionmobility.com only (Rentway v1: see content.js).
    Pro is Vue 3 + DevExtreme, a different app from v1 (Vue 2 + Vuetify): none of the v1 hooks apply here.
    Same rules as v1:
@@ -458,6 +458,143 @@
     };
   })());
 
+  /* ----- P7 · Vehicle Allocation Control, the planning screen (setting "design", html.rwr-vac) -----
+     Pro gives its splitter (timeline above, reservations below) a fixed height of window height - 213 px, taken once
+     when the screen opens. It ignores the banner and the page paddings, so the splitter always runs past the bottom
+     of the screen: the page scrolls around two panes that scroll themselves (nested scrolls), the timeline is short,
+     and the reservation rows sit below the fold. Collapsing or shrinking the reservations pushes them (and the handle
+     that brings them back) off screen.
+     a. One screen, no page scroll: the splitter fills exactly the visible height (recomputed live: resize, banner
+        closed, focus mode, our ON/OFF button). The timeline and the reservation grid keep their own scroll; they are
+        side by side, never nested.
+     b. Reservations never disappear: open, the pane keeps at least its header + 2 rows; collapsed (Pro's ▼), it stays
+        as a 44 px bar, and a click on that bar runs Pro's own ▲.
+     c. Focus mode (our button left of "Expand vehicles", remembered on this computer): hides the survey banner and
+        the app header (search, account) on this screen only, for about 120 px more planning. Esc leaves it.
+     The splitter's inline height and Pro's split ratio are never rewritten: pro.css overrides the height with
+     --rwr-vac-h, Pro's own drag and ▲/▼ keep working. One resize event lets the grids lay themselves out again. */
+  modules.push((() => {
+    const SCROLLER = '.dx-drawer-content > .dx-scrollable > .dx-scrollable-wrapper > .dx-scrollable-container';
+    const GAP = 9, MIN_SPLIT = 300, RES_ROWS = 2, FOCUS_KEY = 'rwrVacFocus';
+    let h = 0, resMin = 0, measuredMin = 0, btn = null, icon = null, label = null;
+    const lastPane = sp => sp.querySelector(':scope > .dx-splitter-item:last-child');
+    const collapsed = pane => !!pane && pane.classList.contains('dx-splitter-item-hidden-content');
+    const focusOn = () => root.classList.contains('rwr-vac-focus');
+    const readFocus = () => { try { return localStorage.getItem(FOCUS_KEY) === '1'; } catch (e) { return false; } };
+    function setFocus(on) {
+      if (on === focusOn()) return;
+      root.classList.toggle('rwr-vac-focus', on);
+      try { on ? localStorage.setItem(FOCUS_KEY, '1') : localStorage.removeItem(FOCUS_KEY); } catch (e) {}
+      window.dispatchEvent(new Event('resize'));   // Pro's page scroller measures its new height
+      requestAnimationFrame(() => { fit(true); place(); });
+    }
+
+    // a + b. Splitter height = visible bottom of the page scroller (above our ON/OFF button when it overlaps) - its top
+    function fit(force) {
+      const sp = document.querySelector('.app-content #splitter-timeline'), sc = document.querySelector(SCROLLER);
+      if (!root.classList.contains('rwr-vac') || !sp || !sc) { release(); return; }
+      const scR = sc.getBoundingClientRect(), spR = sp.getBoundingClientRect();
+      let limit = scR.bottom - GAP;
+      const tg = document.getElementById('rwr-toggle');
+      if (tg) {
+        const t = tg.getBoundingClientRect();
+        if (t.height && t.right > spR.left && t.left < spR.right) limit = Math.min(limit, t.top - GAP);
+      }
+      const next = Math.max(MIN_SPLIT, Math.floor(limit - spR.top));
+      // floor of the open reservations pane: its header and the grid headers + 2 rows, measured while open
+      const pane = lastPane(sp), res = pane && pane.querySelector('.reservations'), rv = res && res.querySelector('.dx-datagrid-rowsview');
+      if (res && rv && !collapsed(pane)) {
+        const row = res.querySelector('.dx-data-row');
+        const rowH = row ? row.getBoundingClientRect().height : 28;
+        const m = Math.ceil(rv.getBoundingClientRect().top - res.getBoundingClientRect().top + RES_ROWS * rowH + 4);
+        if (m > 0) measuredMin = m;
+      }
+      const nextMin = Math.min(measuredMin, Math.floor(next / 2));   // the timeline always keeps at least half
+      if (!force && next === h && nextMin === resMin) return;
+      const changed = next !== h;
+      h = next; resMin = nextMin;
+      root.style.setProperty('--rwr-vac-h', h + 'px');
+      root.style.setProperty('--rwr-vac-res-min', resMin + 'px');
+      if (changed) window.dispatchEvent(new Event('resize'));
+    }
+    function release() {
+      if (!h) return;
+      h = resMin = 0;
+      root.style.removeProperty('--rwr-vac-h'); root.style.removeProperty('--rwr-vac-res-min');
+      window.dispatchEvent(new Event('resize'));
+    }
+
+    // c. Focus button: our own element, fixed, aligned left of Pro's "Expand vehicles / Statuses" group
+    function place() {
+      if (!btn) return;
+      const f = root.classList.contains('rwr-vac') && document.querySelector('.app-content .timeline-header .filters');
+      const v = f && document.querySelector('.app-content .timeline-header .views');
+      const fr = f && f.getBoundingClientRect();
+      if (!fr || !fr.height || helperOpen()) { setAttr(btn, 'data-rwr-show', 'no'); return; }
+      setAttr(btn, 'data-rwr-show', 'yes');   // displayed before measuring; placed in the same frame, so no flash
+      const on = focusOn();
+      setAttr(icon, 'class', 'mdi ' + (on ? 'mdi-fullscreen-exit' : 'mdi-fullscreen'));
+      const text = on ? 'Quitter le plein écran' : 'Plein écran';
+      if (label.textContent !== text) label.textContent = text;
+      setAttr(btn, 'aria-pressed', String(on));
+      setAttr(btn, 'aria-label', on ? 'Quitter le plein écran (Échap)' : 'Plein écran : plus de place pour le planning');
+      // full label if it fits between the date / scale fields and Pro's buttons, else icon only
+      setAttr(btn, 'data-rwr-compact', 'no');
+      const room = fr.left - (v ? v.getBoundingClientRect().right : 0) - 2 * GAP;
+      if (btn.offsetWidth > room) setAttr(btn, 'data-rwr-compact', 'yes');
+      if (btn.getAttribute('data-rwr-compact') === 'yes') setAttr(btn, 'title', label.textContent); else btn.removeAttribute('title');
+      btn.style.height = Math.round(fr.height) + 'px';
+      btn.style.top = Math.round(fr.top) + 'px';
+      btn.style.left = Math.round(fr.left - 16 - btn.offsetWidth) + 'px';
+    }
+
+    // b. A click on the collapsed reservations bar (not on Pro's "Clear") = Pro's own ▲
+    const onClick = e => {
+      const pane = e.target.closest && e.target.closest('#splitter-timeline > .dx-splitter-item-hidden-content:last-child');
+      if (!pane || e.target.closest('.rw-button, .dx-button, button')) return;
+      const up = pane.parentElement.querySelector(':scope > .dx-resize-handle .dx-resize-handle-collapse-prev-pane');
+      if (up) up.click();
+    };
+    // c. Esc leaves focus mode, only when nothing else could want the key (popup, dropdown, field, load)
+    const onKey = e => {
+      if (e.key !== 'Escape' || !focusOn() || e.defaultPrevented || topPopup() || helperOpen() || loading()) return;
+      const a = document.activeElement;
+      if (a && a.matches && a.matches('input, textarea, select, [contenteditable]:not([contenteditable=false])')) return;
+      setFocus(false);
+    };
+    const onResize = e => { if (e.isTrusted) { fit(true); place(); } };   // ignore our own resize events
+    const pass = () => { fit(false); place(); };
+
+    return {
+      key: 'design',
+      apply() {
+        btn = document.createElement('button'); btn.id = 'rwr-vac-focus'; btn.type = 'button';
+        icon = document.createElement('i'); label = document.createElement('span');
+        btn.append(icon, label); setAttr(btn, 'data-rwr-show', 'no');
+        btn.addEventListener('click', () => setFocus(!focusOn()));
+        document.body.append(btn);
+        if (readFocus()) root.classList.add('rwr-vac-focus');
+        document.addEventListener('click', onClick, true);
+        window.addEventListener('keydown', onKey, false);
+        window.addEventListener('resize', onResize);
+        pass();
+      },
+      remove() {
+        document.removeEventListener('click', onClick, true);
+        window.removeEventListener('keydown', onKey, false);
+        window.removeEventListener('resize', onResize);
+        btn.remove(); btn = icon = label = null;
+        const had = focusOn();
+        root.classList.remove('rwr-vac-focus');   // the saved choice stays for next time
+        release();
+        if (had) window.dispatchEvent(new Event('resize'));
+      },
+      onMutate: pass,
+      onRoute() { fit(true); place(); },
+      onSettings() { fit(true); place(); }   // the ON/OFF button (P6) appeared or went away
+    };
+  })());
+
   /* ----- P6 · On-screen ON/OFF button (setting "button", html.rwr-btn) -----
      Same as v1's, moved right of the 60 px sidebar (v1's spot would cover its version label). Switches "design"
      only. Hidden while the sidebar is expanded, and below every popup (z-index in pro.css). */
@@ -498,12 +635,14 @@
   }
   const each = hook => modules.forEach(m => { if (m.on && m[hook]) safe(() => m[hook]()); });
 
-  // Route classes on <html>: rwr-app (in-app routes only), rwr-dash (/dashboard), rwr-drill (/dashboard/…)
+  // Route classes on <html>: rwr-app (in-app routes only), rwr-dash (/dashboard), rwr-drill (/dashboard/…),
+  // rwr-vac (Vehicle Allocation Control, the planning screen)
   function onRoute() {
     const app = inApp(), r = route();
     root.classList.toggle('rwr-app', app);
     root.classList.toggle('rwr-dash', app && r === '/dashboard');
     root.classList.toggle('rwr-drill', app && r.startsWith('/dashboard/'));
+    root.classList.toggle('rwr-vac', app && /\/vehicle-allocation-control$/.test(r));
     sync();
     each('onRoute');
   }
@@ -531,7 +670,7 @@
     bodyObs.disconnect(); titleObs.disconnect(); offChange(); cancelAnimationFrame(raf);
     window.removeEventListener('popstate', checkRoute);
     modules.forEach(m => { if (m.on) { m.on = false; safe(() => m.remove()); } });
-    root.classList.remove('rwr-app', 'rwr-dash', 'rwr-drill', 'rwr-editing');
+    root.classList.remove('rwr-app', 'rwr-dash', 'rwr-drill', 'rwr-vac', 'rwr-vac-focus', 'rwr-editing');
     delete window.__rwrRemove;
   };
 })();

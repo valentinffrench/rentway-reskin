@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Rentway Reskin — CaribeCar",
   "short_name": "Rentway Reskin",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Interface modernisée pour Rentway v1 et Rentway Pro (CaribeCar / Rent-A-Car Guadeloupe). Toutes les fonctions d'origine sont conservées.",
   "icons": {
     "16": "icons/icon16.png",

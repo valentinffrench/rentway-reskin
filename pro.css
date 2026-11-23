@@ -1,7 +1,7 @@
-/* Rentway Reskin — CaribeCar · v2.0.0 — Rentway Pro (rentway.emotionmobility.com)
+/* Rentway Reskin — CaribeCar · v2.1.0 — Rentway Pro (rentway.emotionmobility.com)
    Every rule on a Pro element is scoped to html.rwr-app (set by pro.js on in-app routes only, never on the
    /company-selector boot screen) plus the class of one enhancement (set by early.js from the popup settings):
-   rwr-calm = calm loading · rwr-tips = tooltips · rwr-design = Pro polish · rwr-btn = on-screen button.
+   rwr-calm = calm loading · rwr-tips = tooltips · rwr-design = Pro polish (incl. the planning screen, P7) · rwr-btn = on-screen button.
    Switching an enhancement off restores that part of Pro exactly.
    Prefix rwr- everywhere: Pro already owns rw-* for its own components.
    Colours reuse Pro's own tokens (--base-accent, --title-color…) with the observed value as fallback. */
@@ -76,6 +76,41 @@ html.rwr-app.rwr-design:not(.rwr-editing) .page-content :is(.rw-text-field,.rw-s
 /* d. Dashboard drill-down (/dashboard/…): the grid fills the screen instead of Pro's inline 400 px
    (Pro's inline style is never rewritten: data-rwr-fill + --rwr-grid-h are set by pro.js) */
 html.rwr-app.rwr-design.rwr-drill .data-table-margin[data-rwr-fill]{height:var(--rwr-grid-h,400px)!important}
+
+/* ===== P7 · Vehicle Allocation Control (planning screen, html.rwr-vac) =====
+   a. One screen, no page scroll: the splitter fills the visible height (--rwr-vac-h set by pro.js), Pro's inline
+      height is overridden, never rewritten. Paddings under the page and around the title are trimmed. */
+html.rwr-app.rwr-design.rwr-vac .app-content.has-rw-page{padding-bottom:0!important}
+html.rwr-app.rwr-design.rwr-vac .app-content .page-content{padding-bottom:0!important}
+html.rwr-app.rwr-design.rwr-vac .app-content .page-header-wrapper{padding:6px 0!important;margin-bottom:6px!important}
+html.rwr-app.rwr-design.rwr-vac .app-content .page-header-wrapper h1.title{font-size:20px}
+html.rwr-app.rwr-design.rwr-vac .page-content > .rw-grid:has(> #splitter-timeline){row-gap:9px!important}
+html.rwr-app.rwr-design.rwr-vac[style*="--rwr-vac-h"] .page-content > .rw-grid:has(> #splitter-timeline){grid-template-rows:auto var(--rwr-vac-h)!important}
+html.rwr-app.rwr-design.rwr-vac[style*="--rwr-vac-h"] #splitter-timeline{height:var(--rwr-vac-h)!important}
+html.rwr-app.rwr-design.rwr-vac #splitter-timeline .reservations{padding-top:9px;gap:6px}
+/* b. Reservations never disappear: open = at least header + 2 rows; collapsed = a 44 px bar that reopens on click */
+html.rwr-app.rwr-design.rwr-vac #splitter-timeline > .dx-splitter-item:last-child:not(.dx-splitter-item-hidden-content){
+  min-height:var(--rwr-vac-res-min,0px)}
+html.rwr-app.rwr-design.rwr-vac #splitter-timeline > .dx-splitter-item-hidden-content:last-child{visibility:visible;min-height:44px}
+html.rwr-app.rwr-design.rwr-vac #splitter-timeline > .dx-splitter-item-hidden-content:last-child .grid-reservations{visibility:hidden}
+html.rwr-app.rwr-design.rwr-vac #splitter-timeline > .dx-splitter-item-hidden-content:last-child .header{cursor:pointer}
+html.rwr-app.rwr-design.rwr-vac #splitter-timeline > .dx-splitter-item-hidden-content:last-child .header .title::after{
+  content:"▲ Afficher";margin-left:9px;font:600 12px Inter,system-ui,sans-serif;color:var(--base-accent,#0041ab)}
+html.rwr-app.rwr-design.rwr-vac #splitter-timeline > .dx-splitter-item-hidden-content:last-child .header:hover .title::after{text-decoration:underline}
+/* c. Focus mode: survey banner and app header hidden on this screen only */
+html.rwr-app.rwr-design.rwr-vac.rwr-vac-focus .dx-drawer-content > .drawer-banner,
+html.rwr-app.rwr-design.rwr-vac.rwr-vac-focus .dx-drawer-content > header.header-component{display:none!important}
+/* Focus button: looks like Pro's toolbar buttons; placed by pro.js; below every popup */
+#rwr-vac-focus{position:fixed;z-index:1000;display:flex;align-items:center;gap:6px;box-sizing:border-box;padding:0 12px;margin:0;
+  border:1px solid rgb(225,230,239);border-radius:6px;background:#fff;color:var(--title-color,#1d2433);cursor:pointer;
+  font:14px/18px Inter,system-ui,sans-serif;white-space:nowrap}
+#rwr-vac-focus i{font-size:18px;line-height:1}
+#rwr-vac-focus:hover{background:#f5f7fa}
+#rwr-vac-focus[aria-pressed=true]{border-color:var(--base-accent,#0041ab);color:var(--base-accent,#0041ab)}
+#rwr-vac-focus:focus-visible{outline:2px solid var(--base-accent,#0041ab);outline-offset:2px}
+#rwr-vac-focus[data-rwr-compact=yes]{padding:0 8px}
+#rwr-vac-focus[data-rwr-compact=yes] span{display:none}
+html:not(.rwr-design) #rwr-vac-focus, html:not(.rwr-vac) #rwr-vac-focus, #rwr-vac-focus[data-rwr-show=no]{display:none}
 
 /* ===== P6 · On-screen ON/OFF button =====
    Right of the 60 px collapsed sidebar (v1's spot would cover its "v5.26" label); below every popup;

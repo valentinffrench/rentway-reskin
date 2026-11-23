@@ -1,4 +1,4 @@
-# Rentway Reskin — CaribeCar (v2.0.0)
+# Rentway Reskin — CaribeCar (v2.1.0)
 
 Extension Chrome qui rend Rentway plus lisible et plus confortable **sans rien changer à son fonctionnement**, sur ses deux applications :
 
@@ -32,9 +32,18 @@ Rentway Pro a déjà un en-tête fixe, des onglets et des boutons libellés : l'
 - **Infobulles** : nom des boutons qui n'ont qu'une icône (ex. l'œil = « Voir le détail »), texte complet des cellules de tableau et des tuiles coupées par « … », raccourci Alt + N sur les onglets.
 - **Fermer les fenêtres** avec Échap ou un clic à l'extérieur, **en secours seulement** : Rentway Pro le fait souvent déjà ; l'extension n'intervient que si la fenêtre est toujours ouverte un instant après, en cliquant sur son propre bouton de fermeture. Jamais sur une fenêtre de confirmation (ex. « Supprimer ? »).
 - **Retouches** (réglage « Nouveau design ») : onglets qui débordent signalés par un fondu et défilables à la molette ; sur le tableau de bord, seules les lignes cliquables ressemblent à des liens ; champs vides atténués en consultation (jamais en édition) ; tableaux du tableau de bord (ex. Return RA) sur toute la hauteur de l'écran.
+- **Planning (Vehicle Allocation Control)** (réglage « Nouveau design ») :
+  - **un seul écran, sans défilement de page** : planning et réservations occupent exactement la hauteur visible, recalculée en direct (redimensionnement, bandeau fermé, plein écran). Pro fixait cette hauteur une fois pour toutes à l'ouverture, au-delà du bas de l'écran : la page défilait autour de deux zones qui défilent elles-mêmes. Le planning et la liste des réservations gardent chacun leur défilement, côte à côte, jamais imbriqués ;
+  - **les réservations ne disparaissent plus** : ouvertes, elles gardent au moins leur en-tête et 2 lignes ; repliées (▼ de Pro), elles restent sous forme d'une barre « Reservations ▲ Afficher » en bas de l'écran, qui les rouvre au clic (avant, la barre et la poignée pour les rouvrir sortaient de l'écran) ;
+  - **bouton « Plein écran »**, à gauche de « Expand vehicles » : masque le bandeau d'enquête et l'en-tête de l'application (recherche, compte) sur cet écran seulement, pour environ 120 px de planning en plus. Échap ou le même bouton pour en sortir. Le choix est mémorisé sur le poste ;
+  - la poignée de Pro (glisser, ▲/▼) fonctionne comme avant.
 - Bouton **« Améliorations : ON/OFF »** en bas à gauche, à droite du menu latéral.
 
 L'écran de démarrage (`/company-selector`) et la connexion ne sont jamais modifiés.
+
+## Nouveautés v2.1.0
+
+- Rentway Pro, écran **Vehicle Allocation Control** (planning) : un seul écran sans défilement de page, réservations toujours visibles (barre en bas quand elles sont repliées), bouton « Plein écran ». Réglage « Nouveau design ».
 
 ## Nouveautés v2.0.0
 
@@ -64,7 +73,7 @@ Icône de l'extension dans la barre Chrome → chaque fonction s'active séparé
 
 | Réglage | Rentway v1 | Rentway Pro |
 |---|---|---|
-| Nouveau design | En-tête fixe, onglets libellés, cartes, fenêtres, champs à saisir en premier | Retouches : onglets qui débordent, tableau de bord, champs vides, hauteur des tableaux |
+| Nouveau design | En-tête fixe, onglets libellés, cartes, fenêtres, champs à saisir en premier | Retouches : onglets qui débordent, tableau de bord, champs vides, hauteur des tableaux, écran planning (plein écran) |
 | ↳ Barre de résumé | Bandeau de la réservation (nécessite le nouveau design) | — (Rentway v1 uniquement) |
 | Infobulles | Infobulles sous le bouton au lieu de le masquer | Boutons icônes, textes tronqués, raccourcis des onglets |
 | Bouton ON/OFF à l'écran | Bouton « Nouveau design » en bas à gauche | Bouton « Améliorations » en bas à gauche, à droite du menu |
@@ -81,7 +90,7 @@ Le bouton à l'écran bascule uniquement le design. Les réglages sont mémoris�
 
 - S'exécute **uniquement** sur `https://rentwayv1.emotionmobility.com/*` et `https://rentway.emotionmobility.com/*` (jamais sur la page de connexion `identity.emotionmobility.com`).
 - Une seule permission, `storage`, pour partager les réglages entre les deux applications. Aucun appel réseau, aucune donnée envoyée hors du navigateur.
-- Seule donnée stockée : les réglages (`chrome.storage.local`, clé `rwSettings`, avec une copie dans le `localStorage` de chaque site pour les appliquer dès l'affichage). L'ancienne préférence `rwReskin` de la v1.0 et les réglages de la v1.1 sont repris automatiquement.
+- Données stockées : les réglages (`chrome.storage.local`, clé `rwSettings`, avec une copie dans le `localStorage` de chaque site pour les appliquer dès l'affichage) et, sur Rentway Pro, le choix « Plein écran » du planning (`localStorage`, clé `rwrVacFocus`). L'ancienne préférence `rwReskin` de la v1.0 et les réglages de la v1.1 sont repris automatiquement.
 
 ## Maintenance
 
@@ -89,7 +98,7 @@ Quand Rentway publie une mise à jour, certains éléments peuvent changer de no
 
 - **Rentway v1** (Vue 2 + Vuetify) : libellés des champs, classes Vuetify, icônes `mdi-*`.
 - **Rentway Pro** (Vue 3 + DevExtreme) : classes des composants (`rw-*`, `dx-*`), icônes (`mdi-*`, `dx-icon-*`) et adresses des écrans ; **jamais le texte affiché** (il suit la langue de l'utilisateur) ni les attributs `data-v-*` (ils changent à chaque version). Tout ce que l'extension ajoute sur Pro est préfixé `rwr-` : Pro utilise déjà `rw-` pour ses propres composants.
-- Après chaque mise à jour de Rentway Pro (version affichée en bas du menu latéral, ex. « v5.26 ») : coller `test/pro-healthcheck.js` dans la console (F12) sur une fiche véhicule et sur la caisse. Il ne modifie rien et indique les repères qui ne correspondent plus.
+- Après chaque mise à jour de Rentway Pro (version affichée en bas du menu latéral, ex. « v5.26 ») : coller `test/pro-healthcheck.js` dans la console (F12) sur une fiche véhicule, sur la caisse et sur le planning (Vehicle Allocation Control). Il ne modifie rien et indique les repères qui ne correspondent plus.
 
 Fichiers :
 
@@ -100,6 +109,6 @@ Fichiers :
 | `styles.css` | Style Rentway v1, chaque règle limitée à la classe de sa fonction (`rw-on`, `rw-sum`, `rw-calm`, `rw-tips`, `rw-btn`) |
 | `content.js` | Rentway v1 : libellés, barre de résumé, raccourcis, chargement, infobulles, fermeture des fenêtres |
 | `pro.css` | Style Rentway Pro, chaque règle limitée à la classe de sa fonction (`rwr-design`, `rwr-calm`, `rwr-tips`, `rwr-btn`) et aux écrans de l'application (`rwr-app`) |
-| `pro.js` | Rentway Pro : suivi des écrans, chargement, raccourcis, infobulles, fermeture des fenêtres, retouches, bouton |
+| `pro.js` | Rentway Pro : suivi des écrans, chargement, raccourcis, infobulles, fermeture des fenêtres, retouches, écran planning, bouton |
 | `popup.html` / `popup.js` | Réglages dans la barre Chrome |
 | `test/` | Développement uniquement : page d'essai Rentway Pro, copie de dev, contrôle des repères (voir `test/README.md`) |
