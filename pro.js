@@ -467,8 +467,8 @@
      a. One screen, no page scroll: the splitter fills exactly the visible height, recomputed live (resize, banner
         closed, focus mode, our ON/OFF button). Each pane keeps its own scroll; they are side by side, never nested.
      b. Wide screen (splitter ≥ 1172 px: timeline 760 + panel 400 + gap): the reservations move to a panel on the right
-        and the timeline takes the full height; the panel opens at the width its columns need (at most what leaves the
-        timeline 760 px). Pro's handle is hidden (it only drags up/down); ours sits between the panes: drag (or ←/→) for the
+        and the timeline takes the full height; the panel opens at the width its columns need, up to 36 % of the
+        splitter (the planning comes first; never less than 400 px, never leaving the timeline under 760 px). Pro's handle is hidden (it only drags up/down); ours sits between the panes: drag (or ←/→) for the
         width, double-click for the default width, its chevron folds the panel into a 40 px rail (a click on the rail
         opens it again). Width and fold are remembered on this computer. In the panel, grid columns are sized to their
         content (our own <style>, recomputed when the rows change) and the cell padding is tightened.
@@ -495,8 +495,12 @@
     const proFolded = pane => !!pane && pane.classList.contains('dx-splitter-item-hidden-content');
     const focusOn = () => root.classList.contains('rwr-vac-focus');
     const railOn = () => root.classList.contains('rwr-vac-rail');
-    // saved width, else the width its columns need (+ the grid's scrollbar), else 40 % of the splitter
-    const wantedW = spW => { const n = parseInt(read(K_W), 10); return n > 0 ? n : colsTotal ? colsTotal + 14 : Math.round(spW * 0.4); };
+    // saved width, else the width its columns need (+ the grid's scrollbar) up to 36 % of the splitter: the planning
+    // comes first, the last columns scroll sideways until the panel is widened
+    const wantedW = spW => {
+      const n = parseInt(read(K_W), 10);
+      return n > 0 ? n : Math.min(colsTotal ? colsTotal + 14 : Infinity, Math.max(PANEL_MIN, Math.round(spW * 0.36)));
+    };
     const relayout = () => window.dispatchEvent(new Event('resize'));   // DayPilot and DevExtreme lay out again
 
     function setFocus(on) {

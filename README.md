@@ -32,18 +32,18 @@ Rentway Pro a déjà un en-tête fixe, des onglets et des boutons libellés : l'
 - **Infobulles** : nom des boutons qui n'ont qu'une icône (ex. l'œil = « Voir le détail »), texte complet des cellules de tableau et des tuiles coupées par « … », raccourci Alt + N sur les onglets.
 - **Fermer les fenêtres** avec Échap ou un clic à l'extérieur, **en secours seulement** : Rentway Pro le fait souvent déjà ; l'extension n'intervient que si la fenêtre est toujours ouverte un instant après, en cliquant sur son propre bouton de fermeture. Jamais sur une fenêtre de confirmation (ex. « Supprimer ? »).
 - **Retouches** (réglage « Nouveau design ») : onglets qui débordent signalés par un fondu et défilables à la molette ; sur le tableau de bord, seules les lignes cliquables ressemblent à des liens ; champs vides atténués en consultation (jamais en édition) ; tableaux du tableau de bord (ex. Return RA) sur toute la hauteur de l'écran.
-- **Planning (Vehicle Allocation Control)** (réglage « Nouveau design ») :
-  - **un seul écran, sans défilement de page** : planning et réservations occupent exactement la hauteur visible, recalculée en direct (redimensionnement, bandeau fermé, plein écran). Pro fixait cette hauteur une fois pour toutes à l'ouverture, au-delà du bas de l'écran : la page défilait autour de deux zones qui défilent elles-mêmes. Le planning et la liste des réservations gardent chacun leur défilement, côte à côte, jamais imbriqués ;
-  - **les réservations ne disparaissent plus** : ouvertes, elles gardent au moins leur en-tête et 2 lignes ; repliées (▼ de Pro), elles restent sous forme d'une barre « Reservations ▲ Afficher » en bas de l'écran, qui les rouvre au clic (avant, la barre et la poignée pour les rouvrir sortaient de l'écran) ;
-  - **bouton « Plein écran »**, à gauche de « Expand vehicles » : masque le bandeau d'enquête et l'en-tête de l'application (recherche, compte) sur cet écran seulement, pour environ 120 px de planning en plus. Échap ou le même bouton pour en sortir. Le choix est mémorisé sur le poste ;
-  - la poignée de Pro (glisser, ▲/▼) fonctionne comme avant.
+- **Planning (Vehicle Allocation Control)** (réglage « Nouveau design ») — le planning est la surface de travail :
+  - **un seul écran, sans défilement de page** : la zone occupe exactement la hauteur visible, recalculée en direct (fenêtre, bandeau, menu latéral, zoom). Pro la fixait une fois pour toutes à l'ouverture, au-delà du bas de l'écran. Planning et réservations gardent chacun leur défilement, jamais imbriqués ;
+  - **écran large** (zone ≥ 1 172 px) : les **réservations passent dans un panneau à droite** et le planning prend **toute la hauteur**. Le panneau s'ouvre à la largeur de ses colonnes, au plus 36 % de la zone (les dernières colonnes défilent de côté). Poignée entre les deux : glisser (ou ← / →) pour la largeur, double-clic pour la largeur par défaut ; son chevron replie le panneau en un rail de 40 px, un clic sur le rail le rouvre. Largeur et repli mémorisés sur le poste. Colonnes ajustées à leur contenu (en-têtes abrégés, texte complet en infobulle) ;
+  - **écran étroit** : disposition de Pro (planning au-dessus), ajustée à l'écran ; les réservations gardent au moins leur en-tête et 2 lignes, et repliées (▼ de Pro) restent sous forme d'une barre « ▲ Afficher » ;
+  - **plein écran activé par défaut** : bandeau d'enquête et en-tête de l'application (recherche, compte) masqués sur cet écran seulement. Bouton à gauche de « Expand vehicles » ou Échap pour en sortir ; choix mémorisé.
 - Bouton **« Améliorations : ON/OFF »** en bas à gauche, à droite du menu latéral.
 
 L'écran de démarrage (`/company-selector`) et la connexion ne sont jamais modifiés.
 
 ## Nouveautés v2.1.0
 
-- Rentway Pro, écran **Vehicle Allocation Control** (planning) : un seul écran sans défilement de page, réservations toujours visibles (barre en bas quand elles sont repliées), bouton « Plein écran ». Réglage « Nouveau design ».
+- Rentway Pro, écran **Vehicle Allocation Control** (planning) : planning sur toute la hauteur, réservations dans un panneau à droite sur écran large (largeur réglable, repli en rail), un seul écran sans défilement de page, plein écran par défaut. Réglage « Nouveau design ».
 
 ## Nouveautés v2.0.0
 
@@ -73,7 +73,7 @@ Icône de l'extension dans la barre Chrome → chaque fonction s'active séparé
 
 | Réglage | Rentway v1 | Rentway Pro |
 |---|---|---|
-| Nouveau design | En-tête fixe, onglets libellés, cartes, fenêtres, champs à saisir en premier | Retouches : onglets qui débordent, tableau de bord, champs vides, hauteur des tableaux, écran planning (plein écran) |
+| Nouveau design | En-tête fixe, onglets libellés, cartes, fenêtres, champs à saisir en premier | Retouches : onglets qui débordent, tableau de bord, champs vides, hauteur des tableaux, écran planning (panneau réservations, plein écran) |
 | ↳ Barre de résumé | Bandeau de la réservation (nécessite le nouveau design) | — (Rentway v1 uniquement) |
 | Infobulles | Infobulles sous le bouton au lieu de le masquer | Boutons icônes, textes tronqués, raccourcis des onglets |
 | Bouton ON/OFF à l'écran | Bouton « Nouveau design » en bas à gauche | Bouton « Améliorations » en bas à gauche, à droite du menu |
@@ -90,7 +90,7 @@ Le bouton à l'écran bascule uniquement le design. Les réglages sont mémoris�
 
 - S'exécute **uniquement** sur `https://rentwayv1.emotionmobility.com/*` et `https://rentway.emotionmobility.com/*` (jamais sur la page de connexion `identity.emotionmobility.com`).
 - Une seule permission, `storage`, pour partager les réglages entre les deux applications. Aucun appel réseau, aucune donnée envoyée hors du navigateur.
-- Données stockées : les réglages (`chrome.storage.local`, clé `rwSettings`, avec une copie dans le `localStorage` de chaque site pour les appliquer dès l'affichage) et, sur Rentway Pro, le choix « Plein écran » du planning (`localStorage`, clé `rwrVacFocus`). L'ancienne préférence `rwReskin` de la v1.0 et les réglages de la v1.1 sont repris automatiquement.
+- Données stockées : les réglages (`chrome.storage.local`, clé `rwSettings`, avec une copie dans le `localStorage` de chaque site pour les appliquer dès l'affichage) et, sur Rentway Pro, les choix d'affichage du planning (`localStorage`, clés `rwrVacFocus`, `rwrVacSideW`, `rwrVacSideRail`). L'ancienne préférence `rwReskin` de la v1.0 et les réglages de la v1.1 sont repris automatiquement.
 
 ## Maintenance
 
