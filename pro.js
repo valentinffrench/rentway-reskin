@@ -489,6 +489,7 @@
     const write = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} };
     let h = 0, resMin = 0, measuredMin = 0, side = false, panelW = 0, colsKey = '', colsTotal = 0;
     let btn = null, icon = null, label = null, grip = null, fold = null, colsStyle = null, drag = null, dragT = 0;
+    let ro = null, watched = [];
     const splitter = () => document.querySelector('.app-content #splitter-timeline');
     const lastPane = sp => sp.querySelector(':scope > .dx-splitter-item:last-child');
     const proFolded = pane => !!pane && pane.classList.contains('dx-splitter-item-hidden-content');
@@ -683,7 +684,18 @@
       setFocus(false);
     };
     const onResize = e => { if (e.isTrusted) { fit(true); place(); } };   // ignore our own resize events
-    const pass = () => { fit(false); place(); };
+    // The page scroller and the splitter also change size without a window resize (banner closed, sidebar opened,
+    // zoom): one ResizeObserver on both, re-attached when Pro replaces them
+    function watch() {
+      const els = [document.querySelector(SCROLLER), splitter()].filter(Boolean);
+      if (els.length === watched.length && els.every((el, i) => el === watched[i])) return;
+      if (ro) ro.disconnect();
+      watched = els; ro = null;
+      if (!window.ResizeObserver || !els.length) return;
+      ro = new ResizeObserver(() => requestAnimationFrame(() => { if (btn) { fit(false); place(); } }));
+      els.forEach(el => ro.observe(el));
+    }
+    const pass = () => { watch(); fit(false); place(); };
 
     return {
       key: 'design',
@@ -719,6 +731,7 @@
         window.removeEventListener('keydown', onKey, false);
         window.removeEventListener('resize', onResize);
         clearTimeout(dragT); dragT = 0; drag = null;
+        if (ro) ro.disconnect(); ro = null; watched = [];
         btn.remove(); grip.remove(); btn = icon = label = grip = fold = null;
         root.classList.remove('rwr-vac-focus', 'rwr-vac-rail');   // the saved choices stay for next time
         release();
